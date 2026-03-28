@@ -30,6 +30,6 @@ include(":app")
 gradle.beforeProject {
     val targetPlatform = findProperty("target-platform") as? String ?: return@beforeProject
     if (!targetPlatform.split(",").contains("android-arm")) {
-        extensions.extraProperties["target-platform"] = "android-arm,android-arm64"
+        extensions.extraProperties["target-platform"] = "android-arm,android-arm64,android-x64"
     }
 }

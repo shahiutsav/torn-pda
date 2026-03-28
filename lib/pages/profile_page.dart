@@ -1,8 +1,10 @@
+import 'package:torn_pda/pages/profile/shortcut_carousel.dart';
 import 'package:torn_pda/utils/live_activities/racing_live_activity_parser.dart';
 // Dart imports:
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' hide log;
 
 // Flutter imports:
 import 'package:flutter/gestures.dart';
@@ -349,7 +351,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
     // Join a stream that will notify when the browser closes (a browser initiated in Profile or elsewhere)
     // So that we can 1) refresh the API, 2) start the API timer again
-    _browserHasClosed = context.read<WebViewProvider>().browserHasClosedStream.stream;
+    _browserHasClosed =
+        context.read<WebViewProvider>().browserHasClosedStream.stream;
     _browserHasClosedSubscription = _browserHasClosed.listen((event) {
       log("Browser has closed in Profile, resuming API calls!");
       _resetApiTimer(initCall: true);
@@ -364,13 +367,16 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   /// Restarts the API timer with 1-second checks
   /// [initCall] forces an immediate refresh (e.g., user pull-to-refresh)
   void _resetApiTimer({bool initCall = false}) {
-    if (initCall && (!_webViewProvider.browserShowInForeground || _webViewProvider.webViewSplitActive)) {
+    if (initCall &&
+        (!_webViewProvider.browserShowInForeground ||
+            _webViewProvider.webViewSplitActive)) {
       _apiRefreshPeriodic(forceMisc: false);
     }
 
     _tickerCallApi?.cancel();
     _tickerCallApi = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      if (!_webViewProvider.browserShowInForeground || _webViewProvider.webViewSplitActive) {
+      if (!_webViewProvider.browserShowInForeground ||
+          _webViewProvider.webViewSplitActive) {
         _apiRefreshPeriodic();
       }
     });
@@ -378,7 +384,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
   void _apiRefreshPeriodic({bool forceMisc = false}) {
     // Fast calls: only if data is older than 20 seconds
-    final secondsSinceLastFetch = DateTime.now().difference(_lastFetchApiTime).inSeconds;
+    final secondsSinceLastFetch =
+        DateTime.now().difference(_lastFetchApiTime).inSeconds;
     if (secondsSinceLastFetch >= 20) {
       _fetchApi();
       _refreshEvents();
@@ -386,7 +393,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     }
 
     // Misc calls: only if data is older than 60 seconds (or forced)
-    final secondsSinceLastMisc = DateTime.now().difference(_lastMiscUpdateTime).inSeconds;
+    final secondsSinceLastMisc =
+        DateTime.now().difference(_lastMiscUpdateTime).inSeconds;
     if (secondsSinceLastMisc >= 60 || forceMisc) {
       _getMiscCardInfo(forcedUpdate: forceMisc);
       _getStatsChart();
@@ -428,7 +436,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         _launchShowCases(_);
         return Scaffold(
           backgroundColor: _themeProvider!.canvas,
-          drawer: !_webViewProvider.splitScreenAndBrowserLeft() ? const Drawer() : null,
+          drawer: !_webViewProvider.splitScreenAndBrowserLeft()
+              ? const Drawer()
+              : null,
           appBar: _settingsProvider!.appBarTop ? buildAppBar() : null,
           bottomNavigationBar: !_settingsProvider!.appBarTop
               ? SizedBox(
@@ -479,7 +489,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                           children: <Widget>[
                             const SizedBox(height: 50),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
                               child: _shortcutsCarrousel(),
                             ),
                             const SizedBox(height: 50),
@@ -492,7 +503,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 50, vertical: 20),
                               child: Column(
                                 children: [
                                   Text(
@@ -532,7 +544,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                               "Otherwise, you can head to the forums of Discord to see if there "
                                               "is any more information available.",
                                               textAlign: TextAlign.center,
-                                              style: TextStyle(color: _themeProvider!.getTextColor(Colors.red)),
+                                              style: TextStyle(
+                                                  color: _themeProvider!
+                                                      .getTextColor(
+                                                          Colors.red)),
                                             ),
                                         ],
                                       ),
@@ -601,7 +616,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       }
 
       if (showCases.isNotEmpty) {
-        ShowCaseWidget.of(_).startShowCase(showCases as List<GlobalKey<State<StatefulWidget>>>);
+        ShowCaseWidget.of(_)
+            .startShowCase(showCases as List<GlobalKey<State<StatefulWidget>>>);
       }
     });
   }
@@ -627,7 +643,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       IconData statusIcon;
 
                       final DateTime lastActionTime =
-                          DateTime.fromMillisecondsSinceEpoch(_user!.lastAction!.timestamp! * 1000);
+                          DateTime.fromMillisecondsSinceEpoch(
+                              _user!.lastAction!.timestamp! * 1000);
 
                       final timeFormatter = TimeFormatter(
                         inputTime: lastActionTime,
@@ -636,10 +653,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       );
 
                       final String formattedTime = timeFormatter.formatHour!;
-                      final String detailedTimeDiff = timeFormatter.formatTimeAgo;
+                      final String detailedTimeDiff =
+                          timeFormatter.formatTimeAgo;
 
                       if (_user!.lastAction!.status == 'Offline') {
-                        status = 'Offline for $detailedTimeDiff\n\n($formattedTime)';
+                        status =
+                            'Offline for $detailedTimeDiff\n\n($formattedTime)';
                         backgroundColor = Colors.grey[700]!;
                         statusIcon = Icons.remove_circle;
                       } else if (_user!.lastAction!.status == 'Online') {
@@ -647,7 +666,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                         backgroundColor = const Color(0xFF2E7D32);
                         statusIcon = Icons.circle;
                       } else {
-                        status = 'Idle for $detailedTimeDiff\n\n($formattedTime)';
+                        status =
+                            'Idle for $detailedTimeDiff\n\n($formattedTime)';
                         backgroundColor = Colors.orange[600]!;
                         statusIcon = Icons.adjust;
                       }
@@ -658,7 +678,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                         toastBuilder: (cancelFunc) => Material(
                           type: MaterialType.transparency,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 16),
                             margin: const EdgeInsets.symmetric(horizontal: 20),
                             decoration: BoxDecoration(
                               color: backgroundColor,
@@ -681,7 +702,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                           padding: const EdgeInsets.all(2),
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            border: Border.all(color: Colors.white, width: 2),
+                                            border: Border.all(
+                                                color: Colors.white, width: 2),
                                           ),
                                           child: Icon(
                                             statusIcon,
@@ -715,14 +737,16 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       );
                     },
                     onLongPress: () {
-                      Clipboard.setData(ClipboardData(text: _user!.playerId.toString()));
+                      Clipboard.setData(
+                          ClipboardData(text: _user!.playerId.toString()));
                       BotToast.showCustomText(
                         duration: const Duration(seconds: 3),
                         onlyOne: true,
                         toastBuilder: (cancelFunc) => Material(
                           type: MaterialType.transparency,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 16),
                             margin: const EdgeInsets.symmetric(horizontal: 20),
                             decoration: BoxDecoration(
                               color: Colors.indigo[600],
@@ -771,20 +795,26 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.only(right: 5),
-                                  child: Text(_user!.name!, style: const TextStyle(color: Colors.white)),
+                                  child: Text(_user!.name!,
+                                      style:
+                                          const TextStyle(color: Colors.white)),
                                 ),
                                 if (_user!.lastAction!.status == "Offline")
-                                  const Icon(Icons.remove_circle, size: 14, color: Colors.grey)
+                                  const Icon(Icons.remove_circle,
+                                      size: 14, color: Colors.grey)
                                 else
                                   _user!.lastAction!.status == "Idle"
-                                      ? const Icon(Icons.adjust, size: 14, color: Colors.orange)
-                                      : Icon(Icons.circle, size: 14, color: Colors.green[400]),
+                                      ? const Icon(Icons.adjust,
+                                          size: 14, color: Colors.orange)
+                                      : Icon(Icons.circle,
+                                          size: 14, color: Colors.green[400]),
                               ],
                             ),
                           ),
                           Text(
                             "[${_user!.playerId}] - Level ${_user!.level}",
-                            style: const TextStyle(fontSize: 10, color: Colors.white),
+                            style: const TextStyle(
+                                fontSize: 10, color: Colors.white),
                           ),
                         ],
                       ),
@@ -803,7 +833,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () {
-              final ScaffoldState? scaffoldState = context.findRootAncestorStateOfType();
+              final ScaffoldState? scaffoldState =
+                  context.findRootAncestorStateOfType();
               if (scaffoldState != null) {
                 if (_webViewProvider.splitScreenAndBrowserLeft()) {
                   scaffoldState.openEndDrawer();
@@ -817,7 +848,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             Showcase(
               key: _showcasePdaBrowserButton,
               title: 'Direct Torn access!',
-              description: '\nUse this PDA button in any section to quickly access Torn.\n\n'
+              description:
+                  '\nUse this PDA button in any section to quickly access Torn.\n\n'
                   'By using this icon, you will immediately resume your Torn browser experience, exactly as you '
                   'left it, with no new tabs reloading.\n\n'
                   'Make sure to visit the Settings and Tips section to learn how you can also configure '
@@ -841,7 +873,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             child: Showcase(
               key: _showcaseProfileClock,
               title: 'There is a lot to explore!',
-              description: '\nAlmost anything in Torn PDA can be interacted with!\n\n'
+              description:
+                  '\nAlmost anything in Torn PDA can be interacted with!\n\n'
                   "Try for yourself, and don't forget to visit the Tips section for more "
                   'information!',
               showArrow: false,
@@ -892,7 +925,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             final warnChains = await Prefs().getWarnAboutChains();
             final headerWallet = await Prefs().getShowHeaderWallet();
             final headerIcons = await Prefs().getShowHeaderIcons();
-            final showShortcutEditIcon = await Prefs().getShowShortcutEditIcon();
+            final showShortcutEditIcon =
+                await Prefs().getShowShortcutEditIcon();
             final dedTravel = await Prefs().getDedicatedTravelCard();
             final disableTravel = await Prefs().getDisableTravelSection();
             final expandEvents = await Prefs().getExpandEvents();
@@ -902,7 +936,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             final expandBasicInfo = await Prefs().getExpandBasicInfo();
             final expandNetworth = await Prefs().getExpandNetworth();
             final sectionList = await Prefs().getProfileSectionOrder();
-            final showAllProperties = _settingsProvider!.showAllRentedOutProperties;
+            final showAllProperties =
+                _settingsProvider!.showAllRentedOutProperties;
 
             widget.disableTravelSection(disableTravel);
 
@@ -1141,20 +1176,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     // Main menu, returns either slidable list or wrap (grid)
     Widget shortcutMenu() {
       if (_shortcutsProv.shortcutMenu == "carousel") {
-        return ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: _shortcutsProv.activeShortcuts.length + (_showShortcutEditIcon ? 1 : 0),
-          itemBuilder: (context, index) {
-            final bool isEditOption = _showShortcutEditIcon && index == _shortcutsProv.activeShortcuts.length;
-            if (isEditOption) {
-              return editShortcutTile();
-            }
-            final thisShortcut = _shortcutsProv.activeShortcuts[index];
-            return Semantics(
-              label: "Shortcut to ${thisShortcut.name}",
-              child: ExcludeSemantics(child: shortcutTile(thisShortcut)),
-            );
-          },
+        return ShortcutCarousel(
+          shortcuts: _shortcutsProv.activeShortcuts,
+          showEditIcon: _showShortcutEditIcon,
+          shortcutTileBuilder: (s) => shortcutTile(s),
+          editTileBuilder: ({required width, required height}) =>
+              editShortcutTile(width: width, height: height),
         );
       } else {
         final wrapItems = <Widget>[];
@@ -1202,13 +1229,15 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     }
 
     Widget emptyShortcutsState() {
-      final Color messageColor = _themeProvider!.getTextColor(Colors.orange[900]);
+      final Color messageColor =
+          _themeProvider!.getTextColor(Colors.orange[900]);
 
       final description = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             'No shortcuts configured, add some!',
+            textAlign: TextAlign.center,
             style: TextStyle(
               color: messageColor,
               fontStyle: FontStyle.italic,
@@ -1216,7 +1245,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             ),
           ),
           Text(
-            _showShortcutEditIcon ? 'Tap the icon to configure' : 'Use the profile options to configure them',
+            _showShortcutEditIcon
+                ? 'Tap the icon to configure'
+                : 'Use the profile options to configure them',
             style: TextStyle(
               color: messageColor,
               fontStyle: FontStyle.italic,
@@ -1233,7 +1264,7 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          description,
+          Flexible(child: description),
           const SizedBox(width: 6),
           Semantics(
             label: 'Open shortcuts menu',
@@ -1250,14 +1281,17 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       );
     }
 
-    return SizedBox(
-      // We only need a SizedBox height for the listView, the wrap will expand
-      height: _shortcutsProv.shortcutMenu == "grid"
-          ? null
-          : _shortcutsProv.shortcutTile == 'both'
-              ? 60
-              : 40,
-      child: _shortcutsProv.activeShortcuts.isEmpty ? emptyShortcutsState() : shortcutMenu(),
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minHeight: _shortcutsProv.shortcutMenu == "grid"
+            ? 0
+            : _shortcutsProv.shortcutTile == 'both'
+                ? 60
+                : 40,
+      ),
+      child: _shortcutsProv.activeShortcuts.isEmpty
+          ? emptyShortcutsState()
+          : shortcutMenu(),
     );
   }
 
@@ -1411,16 +1445,17 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           Container(
             decoration: BoxDecoration(
               color: _themeProvider!.cardColor,
-              borderRadius: BorderRadius.circular(_settingsProvider!.colorCodedStatusCard ? 5 : 0),
+              borderRadius: BorderRadius.circular(
+                  _settingsProvider!.colorCodedStatusCard ? 5 : 0),
             ),
             //color: _themeProvider!.cardColor!,
             child: Padding(
-              padding: const EdgeInsets.all(15.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 15),
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -1431,23 +1466,27 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        if (_factionRankedWar != null && _settingsProvider!.rankedWarsInProfile)
+                        if (_factionRankedWar != null &&
+                            _settingsProvider!.rankedWarsInProfile)
                           Row(
                             children: [
                               GestureDetector(
                                 onLongPress: () => _launchBrowser(
-                                  url: 'https://www.torn.com/factions.php?step=your#/war/rank',
+                                  url:
+                                      'https://www.torn.com/factions.php?step=your#/war/rank',
                                   shortTap: false,
                                 ),
                                 onTap: () {
                                   _launchBrowser(
-                                    url: 'https://www.torn.com/factions.php?step=your#/war/rank',
+                                    url:
+                                        'https://www.torn.com/factions.php?step=your#/war/rank',
                                     shortTap: true,
                                   );
                                 },
                                 child: RankedWarMini(
                                   rankedWar: _factionRankedWar,
-                                  playerFactionName: _user!.faction!.factionName,
+                                  playerFactionName:
+                                      _user!.faction!.factionName,
                                   playerFactionTag: _user!.faction!.factionTag,
                                 ),
                               ),
@@ -1455,7 +1494,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                 Row(
                                   children: [
                                     const SizedBox(width: 10),
-                                    _notificationIcon(ProfileNotification.rankedWar),
+                                    _notificationIcon(
+                                        ProfileNotification.rankedWar),
                                   ],
                                 ),
                             ],
@@ -1463,161 +1503,172 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Column(
-                      children: <Widget>[
-                        if (!repatriated)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 2),
-                            child: Row(
+                  Column(
+                    children: <Widget>[
+                      if (!repatriated)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 60,
+                                    child: Text('Status: '),
+                                  ),
+                                  Text(_user!.status!.state!),
+                                  stateBall(),
+                                ],
+                              ),
+                              if (_user!.status!.color == 'red' &&
+                                  _user!.status!.state == "Hospital")
+                                _notificationIcon(ProfileNotification.hospital),
+                              if (_user!.status!.color == 'red' &&
+                                  _user!.status!.state == "Jail")
+                                _notificationIcon(ProfileNotification.jail),
+                            ],
+                          ),
+                        )
+                      else
+                        // Traveling while in hospital (repatriation)
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 2),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Row(
+                                    children: [
+                                      const SizedBox(
+                                        width: 60,
+                                        child: Text('Status: '),
+                                      ),
+                                      Text(_user!.status!.state!),
+                                      stateBall(),
+                                    ],
+                                  ),
+                                  if (_user!.status!.color == 'red' &&
+                                      _user!.status!.state == "Hospital")
+                                    _notificationIcon(
+                                        ProfileNotification.hospital),
+                                  if (_user!.status!.color == 'red' &&
+                                      _user!.status!.state == "Jail")
+                                    _notificationIcon(ProfileNotification.jail),
+                                ],
+                              ),
+                            ),
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Row(
                                   children: [
-                                    const SizedBox(
-                                      width: 60,
-                                      child: Text('Status: '),
-                                    ),
-                                    Text(_user!.status!.state!),
-                                    stateBall(),
+                                    const SizedBox(width: 60),
+                                    const Text("Travel (repatriated)"),
+                                    stateBall(forceBlue: true),
                                   ],
                                 ),
-                                if (_user!.status!.color == 'red' && _user!.status!.state == "Hospital")
-                                  _notificationIcon(ProfileNotification.hospital),
-                                if (_user!.status!.color == 'red' && _user!.status!.state == "Jail")
-                                  _notificationIcon(ProfileNotification.jail),
+                                _notificationIcon(ProfileNotification.travel),
                               ],
                             ),
-                          )
-                        else
-                          // Traveling while in hospital (repatriation)
-                          Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 2),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    Row(
-                                      children: [
-                                        const SizedBox(
-                                          width: 60,
-                                          child: Text('Status: '),
-                                        ),
-                                        Text(_user!.status!.state!),
-                                        stateBall(),
-                                      ],
-                                    ),
-                                    if (_user!.status!.color == 'red' && _user!.status!.state == "Hospital")
-                                      _notificationIcon(ProfileNotification.hospital),
-                                    if (_user!.status!.color == 'red' && _user!.status!.state == "Jail")
-                                      _notificationIcon(ProfileNotification.jail),
-                                  ],
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Row(
-                                    children: [
-                                      const SizedBox(width: 60),
-                                      const Text("Travel (repatriated)"),
-                                      stateBall(forceBlue: true),
-                                    ],
-                                  ),
-                                  _notificationIcon(ProfileNotification.travel),
-                                ],
-                              ),
-                              if (!_dedicatedTravelCard) _travelWidget(repatriated: true),
-                            ],
-                          ),
-                        BazaarStatusCard(
-                          // Careful, in this card we mixed sync with async items, so the miscModel can still be null
-                          bazaarModel: _miscModel?.bazaar,
+                            if (!_dedicatedTravelCard)
+                              _travelWidget(repatriated: true),
+                          ],
+                        ),
+                      BazaarStatusCard(
+                        // Careful, in this card we mixed sync with async items, so the miscModel can still be null
+                        bazaarModel: _miscModel?.bazaar,
+                        launchBrowser: _launchBrowser,
+                      ),
+                      if (_marketItemsV2?.itemmarket != null &&
+                          _marketItemsV2!.itemmarket.isNotEmpty)
+                        MarketStatusCard(
+                          marketModel: _marketItemsV2!,
                           launchBrowser: _launchBrowser,
                         ),
-                        if (_marketItemsV2?.itemmarket != null && _marketItemsV2!.itemmarket.isNotEmpty)
-                          MarketStatusCard(
-                            marketModel: _marketItemsV2!,
-                            launchBrowser: _launchBrowser,
+                      if (!_dedicatedTravelCard) _travelWidget(),
+                      descriptionWidget(),
+                      if (_user!.status!.state == 'Hospital' &&
+                          _w.nukeReviveActive)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 13, top: 10),
+                          child: NukeReviveButton(
+                            themeProvider: _themeProvider,
+                            user: _user,
+                            webViewProvider: _webViewProvider,
+                            settingsProvider: _settingsProvider,
                           ),
-                        if (!_dedicatedTravelCard) _travelWidget(),
-                        descriptionWidget(),
-                        if (_user!.status!.state == 'Hospital' && _w.nukeReviveActive)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 13, top: 10),
-                            child: NukeReviveButton(
-                              themeProvider: _themeProvider,
-                              user: _user,
-                              webViewProvider: _webViewProvider,
-                              settingsProvider: _settingsProvider,
-                            ),
+                        ),
+                      if (_user!.status!.state == 'Hospital' &&
+                          _w.uhcReviveActive)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 13, top: 10),
+                          child: UhcReviveButton(
+                            themeProvider: _themeProvider,
+                            user: _user,
+                            webViewProvider: _webViewProvider,
+                            settingsProvider: _settingsProvider,
                           ),
-                        if (_user!.status!.state == 'Hospital' && _w.uhcReviveActive)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 13, top: 10),
-                            child: UhcReviveButton(
-                              themeProvider: _themeProvider,
-                              user: _user,
-                              webViewProvider: _webViewProvider,
-                              settingsProvider: _settingsProvider,
-                            ),
+                        ),
+                      /*
+                      if (_user!.status!.state == 'Hospital' && _w.helaReviveActive)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 13, top: 10),
+                          child: HelaReviveButton(
+                            themeProvider: _themeProvider,
+                            user: _user,
+                            webViewProvider: _webViewProvider,
+                            settingsProvider: _settingsProvider,
                           ),
-                        /*
-                        if (_user!.status!.state == 'Hospital' && _w.helaReviveActive)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 13, top: 10),
-                            child: HelaReviveButton(
-                              themeProvider: _themeProvider,
-                              user: _user,
-                              webViewProvider: _webViewProvider,
-                              settingsProvider: _settingsProvider,
-                            ),
+                        ),
+                      */
+                      if (_user!.status!.state == 'Hospital' &&
+                          _w.wtfReviveActive)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 13, top: 10),
+                          child: WtfReviveButton(
+                            themeProvider: _themeProvider,
+                            user: _user,
+                            webViewProvider: _webViewProvider,
+                            settingsProvider: _settingsProvider,
                           ),
-                        */
-                        if (_user!.status!.state == 'Hospital' && _w.wtfReviveActive)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 13, top: 10),
-                            child: WtfReviveButton(
-                              themeProvider: _themeProvider,
-                              user: _user,
-                              webViewProvider: _webViewProvider,
-                              settingsProvider: _settingsProvider,
-                            ),
+                        ),
+                      if (_user!.status!.state == 'Hospital' &&
+                          _w.midnightXReviveActive)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 13, top: 10),
+                          child: MidnightXReviveButton(
+                            themeProvider: _themeProvider,
+                            user: _user,
+                            webViewProvider: _webViewProvider,
+                            settingsProvider: _settingsProvider,
                           ),
-                        if (_user!.status!.state == 'Hospital' && _w.midnightXReviveActive)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 13, top: 10),
-                            child: MidnightXReviveButton(
-                              themeProvider: _themeProvider,
-                              user: _user,
-                              webViewProvider: _webViewProvider,
-                              settingsProvider: _settingsProvider,
-                            ),
+                        ),
+                      if (_user!.status!.state == 'Hospital' &&
+                          _w.wolverinesReviveActive)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 13, top: 10),
+                          child: WolverinesReviveButton(
+                            themeProvider: _themeProvider,
+                            user: _user,
+                            webViewProvider: _webViewProvider,
+                            settingsProvider: _settingsProvider,
                           ),
-                        if (_user!.status!.state == 'Hospital' && _w.wolverinesReviveActive)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 13, top: 10),
-                            child: WolverinesReviveButton(
-                              themeProvider: _themeProvider,
-                              user: _user,
-                              webViewProvider: _webViewProvider,
-                              settingsProvider: _settingsProvider,
-                            ),
+                        ),
+                      if (_user!.status!.state == 'Hospital' &&
+                          _w.combatReadyReviveActive)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 13, top: 10),
+                          child: CombatReadyReviveButton(
+                            themeProvider: _themeProvider,
+                            user: _user,
+                            webViewProvider: _webViewProvider,
+                            settingsProvider: _settingsProvider,
                           ),
-                        if (_user!.status!.state == 'Hospital' && _w.combatReadyReviveActive)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 13, top: 10),
-                            child: CombatReadyReviveButton(
-                              themeProvider: _themeProvider,
-                              user: _user,
-                              webViewProvider: _webViewProvider,
-                              settingsProvider: _settingsProvider,
-                            ),
-                          ),
-                      ],
-                    ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 10),
                 ],
@@ -1646,11 +1697,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       final endTime = _user!.travel!.timestamp!;
       final totalTravelTimeSeconds = endTime - startTime;
 
-      final dateTimeArrival = DateTime.fromMillisecondsSinceEpoch(_user!.travel!.timestamp! * 1000);
+      final dateTimeArrival =
+          DateTime.fromMillisecondsSinceEpoch(_user!.travel!.timestamp! * 1000);
       final timeDifference = dateTimeArrival.difference(DateTime.now());
       String twoDigits(int n) => n.toString().padLeft(2, "0");
-      final String twoDigitMinutes = twoDigits(timeDifference.inMinutes.remainder(60));
-      final String diff = '${twoDigits(timeDifference.inHours)}h ${twoDigitMinutes}m';
+      final String twoDigitMinutes =
+          twoDigits(timeDifference.inMinutes.remainder(60));
+      final String diff =
+          '${twoDigits(timeDifference.inHours)}h ${twoDigitMinutes}m';
 
       final formattedTime = TimeFormatter(
         inputTime: dateTimeArrival,
@@ -1678,14 +1732,17 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 Row(
                   children: [
                     GestureDetector(
-                      onLongPress: () => _launchBrowser(url: 'https://www.torn.com', shortTap: false),
+                      onLongPress: () => _launchBrowser(
+                          url: 'https://www.torn.com', shortTap: false),
                       onTap: () {
-                        _launchBrowser(url: 'https://www.torn.com', shortTap: true);
+                        _launchBrowser(
+                            url: 'https://www.torn.com', shortTap: true);
                       },
                       child: LinearPercentIndicator(
                         padding: const EdgeInsets.all(0),
                         barRadius: const Radius.circular(10),
-                        isRTL: _user!.travel!.destination == "Torn" ? true : false,
+                        isRTL:
+                            _user!.travel!.destination == "Torn" ? true : false,
                         center: Text(
                           diff,
                           style: const TextStyle(
@@ -1699,18 +1756,26 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                               : const EdgeInsets.only(top: 7, right: 15),
                           child: Opacity(
                             // Make icon transparent when about to pass over text
-                            opacity: percentage < 0.2 || percentage > 0.7 ? 1 : 0.3,
+                            opacity:
+                                percentage < 0.2 || percentage > 0.7 ? 1 : 0.3,
                             child: _user!.travel!.destination == "Torn"
                                 ? isChristmasPeriod()
                                     ? Transform(
                                         alignment: Alignment.center,
-                                        transform: Matrix4.identity()..scale(-1.0, 1.0),
-                                        child: Icon(FontAwesomeIcons.sleigh, color: Colors.blue[900], size: 22),
+                                        transform: Matrix4.identity()
+                                          ..scale(-1.0, 1.0),
+                                        child: Icon(FontAwesomeIcons.sleigh,
+                                            color: Colors.blue[900], size: 22),
                                       )
-                                    : Image.asset('images/icons/plane_left.png', color: Colors.blue[900], height: 22)
+                                    : Image.asset('images/icons/plane_left.png',
+                                        color: Colors.blue[900], height: 22)
                                 : isChristmasPeriod()
-                                    ? Icon(FontAwesomeIcons.sleigh, color: Colors.blue[900], size: 22)
-                                    : Image.asset('images/icons/plane_right.png', color: Colors.blue[900], height: 22),
+                                    ? Icon(FontAwesomeIcons.sleigh,
+                                        color: Colors.blue[900], size: 22)
+                                    : Image.asset(
+                                        'images/icons/plane_right.png',
+                                        color: Colors.blue[900],
+                                        height: 22),
                           ),
                         ),
                         animateFromLastPercent: true,
@@ -1729,7 +1794,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       ),
                   ],
                 ),
-                if (!_dedicatedTravelCard) _notificationIcon(ProfileNotification.travel),
+                if (!_dedicatedTravelCard)
+                  _notificationIcon(ProfileNotification.travel),
               ],
             ),
             const SizedBox(height: 10),
@@ -1739,7 +1805,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 Row(
                   children: <Widget>[
                     Flexible(
-                      child: Text('Arriving in ${_user!.travel!.destination} at $formattedTime'),
+                      child: Text(
+                          'Arriving in ${_user!.travel!.destination} at $formattedTime'),
                     ),
                   ],
                 ),
@@ -1763,7 +1830,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     bool repatriated = false;
     if (_user!.status!.state == "Traveling") {
       header = _travelWidget();
-    } else if (_user!.status!.state == "Hospital" && _user!.travel!.timeLeft! > 0) {
+    } else if (_user!.status!.state == "Hospital" &&
+        _user!.travel!.timeLeft! > 0) {
       header = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1848,7 +1916,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       );
     } else {
       Widget ocStatus = const SizedBox.shrink();
-      if ((_ocFinalStringShort.isNotEmpty || _ocSimpleExists) && _ocTime.difference(DateTime.now()).inHours < 10) {
+      if ((_ocFinalStringShort.isNotEmpty || _ocSimpleExists) &&
+          _ocTime.difference(DateTime.now()).inHours < 10) {
         if (!_ocSimpleExists) {
           ocStatus = Padding(
             padding: const EdgeInsets.only(top: 5),
@@ -1949,7 +2018,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                   ],
                 ),
                 onLongPress: () {
-                  _launchBrowser(url: 'https://www.torn.com/travelagency.php', shortTap: false);
+                  _launchBrowser(
+                      url: 'https://www.torn.com/travelagency.php',
+                      shortTap: false);
                 },
                 onPressed: () async {
                   const url = 'https://www.torn.com/travelagency.php';
@@ -1979,7 +2050,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             shape: RoundedRectangleBorder(
               side: BorderSide(
-                color: _travelNotificationsPending ? Colors.green : Colors.blueGrey,
+                color: _travelNotificationsPending
+                    ? Colors.green
+                    : Colors.blueGrey,
                 width: 2,
               ),
               borderRadius: BorderRadius.circular(50),
@@ -2030,7 +2103,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       );
     } else if (Platform.isIOS) {
       if (_isAlarmKitAvailableIos) {
-        final descriptor = AlarmKitServiceIos.profileDescriptor(ProfileNotification.travel.string ?? '');
+        final descriptor = AlarmKitServiceIos.profileDescriptor(
+            ProfileNotification.travel.string ?? '');
         final logicalAlarmId = descriptor.alarmId;
         alertsButton = Row(
           children: [
@@ -2040,7 +2114,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(
                 side: BorderSide(
-                  color: _travelNotificationsPending ? Colors.green : Colors.blueGrey,
+                  color: _travelNotificationsPending
+                      ? Colors.green
+                      : Colors.blueGrey,
                   width: 2,
                 ),
                 borderRadius: BorderRadius.circular(50),
@@ -2058,7 +2134,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(
                 side: BorderSide(
-                  color: _activeAlarmKitIdsIos.contains(logicalAlarmId) ? Colors.green : Colors.blueGrey,
+                  color: _activeAlarmKitIdsIos.contains(logicalAlarmId)
+                      ? Colors.green
+                      : Colors.blueGrey,
                   width: 2,
                 ),
                 borderRadius: BorderRadius.circular(50),
@@ -2079,7 +2157,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           shape: RoundedRectangleBorder(
             side: BorderSide(
-              color: _travelNotificationsPending ? Colors.green : Colors.blueGrey,
+              color:
+                  _travelNotificationsPending ? Colors.green : Colors.blueGrey,
               width: 2,
             ),
             borderRadius: BorderRadius.circular(50),
@@ -2178,7 +2257,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               padding: const EdgeInsets.only(left: 8),
               child: Column(
                 children: <Widget>[
-                  if (_warnAboutChains && _chainModel.chain!.current! > 10 && _chainModel.chain!.cooldown == 0)
+                  if (_warnAboutChains &&
+                      _chainModel.chain!.current! > 10 &&
+                      _chainModel.chain!.cooldown == 0)
                     Row(
                       children: [
                         const SizedBox(width: 65),
@@ -2207,20 +2288,26 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                           GestureDetector(
                             key: _showOne,
                             onLongPress: () {
-                              _launchBrowser(url: 'https://www.torn.com/gym.php', shortTap: false);
+                              _launchBrowser(
+                                  url: 'https://www.torn.com/gym.php',
+                                  shortTap: false);
                             },
                             onTap: () async {
-                              _launchBrowser(url: 'https://www.torn.com/gym.php', shortTap: true);
+                              _launchBrowser(
+                                  url: 'https://www.torn.com/gym.php',
+                                  shortTap: true);
                             },
                             child: Showcase(
                               key: _showcaseProfileBars,
                               title: 'Did you know?',
-                              description: '\nTap any of the bars to launch a browser '
+                              description:
+                                  '\nTap any of the bars to launch a browser '
                                   'straight to the gym, crimes or items sections!',
                               targetPadding: const EdgeInsets.all(10),
                               disableMovingAnimation: true,
                               textColor: _themeProvider!.mainText,
-                              tooltipBackgroundColor: _themeProvider!.secondBackground,
+                              tooltipBackgroundColor:
+                                  _themeProvider!.secondBackground,
                               descTextStyle: const TextStyle(fontSize: 13),
                               tooltipPadding: const EdgeInsets.all(20),
                               child: LinearPercentIndicator(
@@ -2237,13 +2324,18 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                     style: const TextStyle(color: Colors.black),
                                   ),
                                 ),
-                                percent: _user!.energy!.current! / _user!.energy!.maximum! > 1.0
+                                percent: _user!.energy!.current! /
+                                            _user!.energy!.maximum! >
+                                        1.0
                                     ? 1.0
-                                    : _user!.energy!.current! / _user!.energy!.maximum!,
+                                    : _user!.energy!.current! /
+                                        _user!.energy!.maximum!,
                               ),
                             ),
                           ),
-                          if (_warnAboutChains && _chainModel.chain!.current! > 10 && _chainModel.chain!.cooldown == 0)
+                          if (_warnAboutChains &&
+                              _chainModel.chain!.current! > 10 &&
+                              _chainModel.chain!.cooldown == 0)
                             Padding(
                               padding: const EdgeInsets.only(left: 5),
                               child: GestureDetector(
@@ -2286,10 +2378,16 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                           const SizedBox(width: 10),
                           GestureDetector(
                             onLongPress: () {
-                              _launchBrowser(url: 'https://www.torn.com/crimes.php#/step=main', shortTap: false);
+                              _launchBrowser(
+                                  url:
+                                      'https://www.torn.com/crimes.php#/step=main',
+                                  shortTap: false);
                             },
                             onTap: () async {
-                              _launchBrowser(url: 'https://www.torn.com/crimes.php#/step=main', shortTap: true);
+                              _launchBrowser(
+                                  url:
+                                      'https://www.torn.com/crimes.php#/step=main',
+                                  shortTap: true);
                             },
                             child: LinearPercentIndicator(
                               padding: const EdgeInsets.all(0),
@@ -2305,9 +2403,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                   style: const TextStyle(color: Colors.black),
                                 ),
                               ),
-                              percent: _user!.nerve!.current! / _user!.nerve!.maximum! > 1.0
+                              percent: _user!.nerve!.current! /
+                                          _user!.nerve!.maximum! >
+                                      1.0
                                   ? 1.0
-                                  : _user!.nerve!.current! / _user!.nerve!.maximum!,
+                                  : _user!.nerve!.current! /
+                                      _user!.nerve!.maximum!,
                             ),
                           ),
                         ],
@@ -2333,10 +2434,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       const SizedBox(width: 10),
                       GestureDetector(
                         onLongPress: () {
-                          _launchBrowser(url: 'https://www.torn.com/item.php#candy-items', shortTap: false);
+                          _launchBrowser(
+                              url: 'https://www.torn.com/item.php#candy-items',
+                              shortTap: false);
                         },
                         onTap: () async {
-                          _launchBrowser(url: 'https://www.torn.com/item.php#candy-items', shortTap: true);
+                          _launchBrowser(
+                              url: 'https://www.torn.com/item.php#candy-items',
+                              shortTap: true);
                         },
                         child: LinearPercentIndicator(
                           padding: const EdgeInsets.all(0),
@@ -2352,7 +2457,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                               style: const TextStyle(color: Colors.black),
                             ),
                           ),
-                          percent: _user!.happy!.current! / _user!.happy!.maximum! > 1.0
+                          percent: _user!.happy!.current! /
+                                      _user!.happy!.maximum! >
+                                  1.0
                               ? 1.0
                               : _user!.happy!.current! / _user!.happy!.maximum!,
                         ),
@@ -2383,14 +2490,18 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                             onLongPress: () {
                               if (_settingsProvider!.lifeBarOption == "ask") {
                                 _showLifeBarDialog(context, longPress: true);
-                              } else if (_settingsProvider!.lifeBarOption == "inventory") {
+                              } else if (_settingsProvider!.lifeBarOption ==
+                                  "inventory") {
                                 _launchBrowser(
-                                  url: 'https://www.torn.com/item.php#medical-items',
+                                  url:
+                                      'https://www.torn.com/item.php#medical-items',
                                   shortTap: false,
                                 );
-                              } else if (_settingsProvider!.lifeBarOption == "faction") {
+                              } else if (_settingsProvider!.lifeBarOption ==
+                                  "faction") {
                                 _launchBrowser(
-                                  url: 'https://www.torn.com/factions.php?step=your#/tab=armoury&start=0&sub=medical',
+                                  url:
+                                      'https://www.torn.com/factions.php?step=your#/tab=armoury&start=0&sub=medical',
                                   shortTap: false,
                                 );
                               }
@@ -2398,14 +2509,18 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                             onTap: () async {
                               if (_settingsProvider!.lifeBarOption == "ask") {
                                 _showLifeBarDialog(context);
-                              } else if (_settingsProvider!.lifeBarOption == "inventory") {
+                              } else if (_settingsProvider!.lifeBarOption ==
+                                  "inventory") {
                                 _launchBrowser(
-                                  url: 'https://www.torn.com/item.php#medical-items',
+                                  url:
+                                      'https://www.torn.com/item.php#medical-items',
                                   shortTap: true,
                                 );
-                              } else if (_settingsProvider!.lifeBarOption == "faction") {
+                              } else if (_settingsProvider!.lifeBarOption ==
+                                  "faction") {
                                 _launchBrowser(
-                                  url: 'https://www.torn.com/factions.php?step=your#/tab=armoury&start=0&sub=medical',
+                                  url:
+                                      'https://www.torn.com/factions.php?step=your#/tab=armoury&start=0&sub=medical',
                                   shortTap: true,
                                 );
                               }
@@ -2424,9 +2539,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                   style: const TextStyle(color: Colors.black),
                                 ),
                               ),
-                              percent: _user!.life!.current! / _user!.life!.maximum! > 1.0
+                              percent: _user!.life!.current! /
+                                          _user!.life!.maximum! >
+                                      1.0
                                   ? 1.0
-                                  : _user!.life!.current! / _user!.life!.maximum!,
+                                  : _user!.life!.current! /
+                                      _user!.life!.maximum!,
                             ),
                           ),
                           if (_user!.status!.state == "Hospital")
@@ -2455,10 +2573,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   Widget _barTime(String type) {
     switch (type) {
       case "energy":
-        if (_user!.energy!.fulltime == 0 || _user!.energy!.current! > _user!.energy!.maximum!) {
+        if (_user!.energy!.fulltime == 0 ||
+            _user!.energy!.current! > _user!.energy!.maximum!) {
           return const SizedBox.shrink();
         } else {
-          final time = _serverTime.add(Duration(seconds: _user!.energy!.fulltime!));
+          final time =
+              _serverTime.add(Duration(seconds: _user!.energy!.fulltime!));
           final timeFormatted = TimeFormatter(
             inputTime: time,
             timeFormatSetting: _settingsProvider!.currentTimeFormat,
@@ -2472,10 +2592,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           );
         }
       case "nerve":
-        if (_user!.nerve!.fulltime == 0 || _user!.nerve!.current! > _user!.nerve!.maximum!) {
+        if (_user!.nerve!.fulltime == 0 ||
+            _user!.nerve!.current! > _user!.nerve!.maximum!) {
           return const SizedBox.shrink();
         } else {
-          final time = _serverTime.add(Duration(seconds: _user!.nerve!.fulltime!));
+          final time =
+              _serverTime.add(Duration(seconds: _user!.nerve!.fulltime!));
           final timeFormatted = TimeFormatter(
             inputTime: time,
             timeFormatSetting: _settingsProvider!.currentTimeFormat,
@@ -2489,10 +2611,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           );
         }
       case "happy":
-        if (_user!.happy!.fulltime == 0 || _user!.happy!.current! > _user!.happy!.maximum!) {
+        if (_user!.happy!.fulltime == 0 ||
+            _user!.happy!.current! > _user!.happy!.maximum!) {
           return const SizedBox.shrink();
         } else {
-          final time = _serverTime.add(Duration(seconds: _user!.happy!.fulltime!));
+          final time =
+              _serverTime.add(Duration(seconds: _user!.happy!.fulltime!));
           final timeFormatted = TimeFormatter(
             inputTime: time,
             timeFormatSetting: _settingsProvider!.currentTimeFormat,
@@ -2506,10 +2630,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           );
         }
       case "life":
-        if (_user!.life!.fulltime == 0 || _user!.life!.current! > _user!.life!.maximum!) {
+        if (_user!.life!.fulltime == 0 ||
+            _user!.life!.current! > _user!.life!.maximum!) {
           return const SizedBox.shrink();
         } else {
-          final time = _serverTime.add(Duration(seconds: _user!.life!.fulltime!));
+          final time =
+              _serverTime.add(Duration(seconds: _user!.life!.fulltime!));
           final timeFormatted = TimeFormatter(
             inputTime: time,
             timeFormatSetting: _settingsProvider!.currentTimeFormat,
@@ -2571,7 +2697,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     late String timerSetString;
     NotificationType notificationType = NotificationType.notification;
     IconData? notificationIcon;
-    final descriptor = AlarmKitServiceIos.profileDescriptor(profileNotification.string ?? '');
+    final descriptor =
+        AlarmKitServiceIos.profileDescriptor(profileNotification.string ?? '');
     final logicalAlarmId = descriptor.alarmId;
     final bool isIOS = Platform.isIOS;
 
@@ -2587,12 +2714,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     switch (profileNotification) {
       case ProfileNotification.travel:
         semanticsLabel += "for travel";
-        _travelArrivalTime = DateTime.fromMillisecondsSinceEpoch(_user!.travel!.timestamp! * 1000);
+        _travelArrivalTime = DateTime.fromMillisecondsSinceEpoch(
+            _user!.travel!.timestamp! * 1000);
         final timeDifference = _travelArrivalTime.difference(DateTime.now());
         secondsToGo = timeDifference.inSeconds;
         notificationsPending = _travelNotificationsPending;
 
-        final notificationTime = _travelArrivalTime.add(Duration(seconds: -_travelNotificationAhead));
+        final notificationTime = _travelArrivalTime
+            .add(Duration(seconds: -_travelNotificationAhead));
         final formattedTimeNotification = TimeFormatter(
           inputTime: notificationTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
@@ -2600,7 +2729,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         ).formatHourWithDaysElapsed();
 
         final alarmTime = _travelArrivalTime.add(
-          Platform.isIOS ? Duration(seconds: -_travelAlarmAhead) : Duration(minutes: -_travelAlarmAhead),
+          Platform.isIOS
+              ? Duration(seconds: -_travelAlarmAhead)
+              : Duration(minutes: -_travelAlarmAhead),
         );
         final formattedTimeAlarm = TimeFormatter(
           inputTime: alarmTime,
@@ -2608,14 +2739,16 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        final timerTime = _travelArrivalTime.add(Duration(seconds: -_travelTimerAhead));
+        final timerTime =
+            _travelArrivalTime.add(Duration(seconds: -_travelTimerAhead));
         final formattedTimeTimer = TimeFormatter(
           inputTime: timerTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        notificationSetString = 'Travel notification set for $formattedTimeNotification';
+        notificationSetString =
+            'Travel notification set for $formattedTimeNotification';
         notificationCancelString = 'Travel notification cancelled!';
         alarmSetString = 'Travel alarm set for $formattedTimeAlarm';
         alarmCancelString = 'Travel alarm cancelled!';
@@ -2645,8 +2778,11 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             // If there is more than 1 tick to go, we multiply ticks times
             // the interval, and decrease for the current tick consumed
             if (energyTicksToGo > 1) {
-              final consumedTick = _user!.energy!.interval! - _user!.energy!.ticktime!;
-              secondsToGo = (energyTicksToGo * _user!.energy!.interval! - consumedTick).floor();
+              final consumedTick =
+                  _user!.energy!.interval! - _user!.energy!.ticktime!;
+              secondsToGo =
+                  (energyTicksToGo * _user!.energy!.interval! - consumedTick)
+                      .floor();
             }
             // If we are in the current tick or example in the next one,
             // we just take into consideration the tick time left
@@ -2661,7 +2797,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             secondsToGo = _user!.energy!.fulltime;
           }
 
-          _energyNotificationTime = DateTime.now().add(Duration(seconds: secondsToGo!));
+          _energyNotificationTime =
+              DateTime.now().add(Duration(seconds: secondsToGo!));
           final formattedTime = TimeFormatter(
             inputTime: _energyNotificationTime,
             timeFormatSetting: _settingsProvider!.currentTimeFormat,
@@ -2671,9 +2808,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           if (!percentageError) {
             _customEnergyMaxOverride = false;
             Prefs().setEnergyPercentageOverride(false);
-            notificationSetString = 'Energy notification set for $formattedTime (E$_customEnergyTrigger)';
-            alarmSetString = 'Energy alarm set for $formattedTime (E$_customEnergyTrigger)';
-            timerSetString = 'Energy timer set for $formattedTime (E$_customEnergyTrigger)';
+            notificationSetString =
+                'Energy notification set for $formattedTime (E$_customEnergyTrigger)';
+            alarmSetString =
+                'Energy alarm set for $formattedTime (E$_customEnergyTrigger)';
+            timerSetString =
+                'Energy timer set for $formattedTime (E$_customEnergyTrigger)';
           } else {
             _customEnergyMaxOverride = true;
             Prefs().setEnergyPercentageOverride(true);
@@ -2701,8 +2841,11 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             // If there is more than 1 tick to go, we multiply ticks times
             // the interval, and decrease for the current tick consumed
             if (nerveTicksToGo > 1) {
-              final consumedTick = _user!.nerve!.interval! - _user!.nerve!.ticktime!;
-              secondsToGo = (nerveTicksToGo * _user!.nerve!.interval! - consumedTick).floor();
+              final consumedTick =
+                  _user!.nerve!.interval! - _user!.nerve!.ticktime!;
+              secondsToGo =
+                  (nerveTicksToGo * _user!.nerve!.interval! - consumedTick)
+                      .floor();
             }
             // If we are in the current tick or example in the next one,
             // we just take into consideration the tick time left
@@ -2717,7 +2860,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             secondsToGo = _user!.nerve!.fulltime;
           }
 
-          _nerveNotificationTime = DateTime.now().add(Duration(seconds: secondsToGo!));
+          _nerveNotificationTime =
+              DateTime.now().add(Duration(seconds: secondsToGo!));
           final formattedTime = TimeFormatter(
             inputTime: _nerveNotificationTime,
             timeFormatSetting: _settingsProvider!.currentTimeFormat,
@@ -2727,9 +2871,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           if (!percentageError) {
             _customNerveMaxOverride = false;
             Prefs().setNervePercentageOverride(false);
-            notificationSetString = 'Nerve notification set for $formattedTime (N$_customNerveTrigger)';
-            alarmSetString = 'Nerve alarm set for $formattedTime (N$_customNerveTrigger)';
-            timerSetString = 'Nerve timer set for $formattedTime (N$_customNerveTrigger)';
+            notificationSetString =
+                'Nerve notification set for $formattedTime (N$_customNerveTrigger)';
+            alarmSetString =
+                'Nerve alarm set for $formattedTime (N$_customNerveTrigger)';
+            timerSetString =
+                'Nerve timer set for $formattedTime (N$_customNerveTrigger)';
           } else {
             _customNerveMaxOverride = true;
             Prefs().setNervePercentageOverride(true);
@@ -2752,7 +2899,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         semanticsLabel += "for life";
         secondsToGo = _user!.life!.fulltime;
         notificationsPending = _lifeNotificationsPending;
-        _lifeNotificationTime = DateTime.now().add(Duration(seconds: _user!.life!.fulltime!));
+        _lifeNotificationTime =
+            DateTime.now().add(Duration(seconds: _user!.life!.fulltime!));
         final formattedTime = TimeFormatter(
           inputTime: _lifeNotificationTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
@@ -2770,13 +2918,15 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         semanticsLabel += "for drugs";
         secondsToGo = _user!.cooldowns!.drug;
         notificationsPending = _drugsNotificationsPending;
-        _drugsNotificationTime = DateTime.now().add(Duration(seconds: _user!.cooldowns!.drug!));
+        _drugsNotificationTime =
+            DateTime.now().add(Duration(seconds: _user!.cooldowns!.drug!));
         final formattedTime = TimeFormatter(
           inputTime: _drugsNotificationTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
-        notificationSetString = 'Drugs cooldown notification set for $formattedTime';
+        notificationSetString =
+            'Drugs cooldown notification set for $formattedTime';
         notificationCancelString = 'Drugs cooldown notification cancelled!';
         alarmSetString = 'Drugs cooldown alarm set for $formattedTime';
         alarmCancelString = 'Drugs cooldown alarm cancelled!';
@@ -2788,13 +2938,15 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         semanticsLabel += "for medical";
         secondsToGo = _user!.cooldowns!.medical;
         notificationsPending = _medicalNotificationsPending;
-        _medicalNotificationTime = DateTime.now().add(Duration(seconds: _user!.cooldowns!.medical!));
+        _medicalNotificationTime =
+            DateTime.now().add(Duration(seconds: _user!.cooldowns!.medical!));
         final formattedTime = TimeFormatter(
           inputTime: _medicalNotificationTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
-        notificationSetString = 'Medical cooldown notification set for $formattedTime';
+        notificationSetString =
+            'Medical cooldown notification set for $formattedTime';
         notificationCancelString = 'Medical cooldown notification cancelled!';
         alarmSetString = 'Medical cooldown alarm set for $formattedTime';
         alarmCancelString = 'Medical cooldown alarm cancelled!';
@@ -2806,13 +2958,15 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         semanticsLabel += "for booster";
         secondsToGo = _user!.cooldowns!.booster;
         notificationsPending = _boosterNotificationsPending;
-        _boosterNotificationTime = DateTime.now().add(Duration(seconds: _user!.cooldowns!.booster!));
+        _boosterNotificationTime =
+            DateTime.now().add(Duration(seconds: _user!.cooldowns!.booster!));
         final formattedTime = TimeFormatter(
           inputTime: _boosterNotificationTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
-        notificationSetString = 'Booster cooldown notification set for $formattedTime';
+        notificationSetString =
+            'Booster cooldown notification set for $formattedTime';
         notificationCancelString = 'Booster cooldown notification cancelled!';
         alarmSetString = 'Booster cooldown alarm set for $formattedTime';
         alarmCancelString = 'Booster cooldown alarm cancelled!';
@@ -2823,8 +2977,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       case ProfileNotification.education:
         semanticsLabel += "for education";
         if (_miscModel != null && _miscModel!.education.current != null) {
-          secondsToGo = _miscModel!.education.current!.until - (DateTime.now().millisecondsSinceEpoch ~/ 1000);
-          _educationNotificationTime = DateTime.fromMillisecondsSinceEpoch(_miscModel!.education.current!.until * 1000);
+          secondsToGo = _miscModel!.education.current!.until -
+              (DateTime.now().millisecondsSinceEpoch ~/ 1000);
+          _educationNotificationTime = DateTime.fromMillisecondsSinceEpoch(
+              _miscModel!.education.current!.until * 1000);
         } else {
           secondsToGo = 0;
           _educationNotificationTime = DateTime.now();
@@ -2841,36 +2997,42 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         alarmCancelString = 'Education alarm cancelled!';
         timerSetString = 'Education timer set for $formattedTime';
         notificationType = _educationNotificationType;
-        notificationIcon = _educationNotificationIcon ?? Icons.chat_bubble_outline;
+        notificationIcon =
+            _educationNotificationIcon ?? Icons.chat_bubble_outline;
 
       case ProfileNotification.hospital:
         semanticsLabel += "for hospital";
-        _hospitalReleaseTime = DateTime.fromMillisecondsSinceEpoch(_user!.status!.until! * 1000);
+        _hospitalReleaseTime =
+            DateTime.fromMillisecondsSinceEpoch(_user!.status!.until! * 1000);
         secondsToGo = _hospitalReleaseTime.difference(DateTime.now()).inSeconds;
         notificationsPending = _hospitalNotificationsPending;
 
-        final notificationTime = _hospitalReleaseTime.add(Duration(seconds: -_hospitalNotificationAhead));
+        final notificationTime = _hospitalReleaseTime
+            .add(Duration(seconds: -_hospitalNotificationAhead));
         final formattedTime = TimeFormatter(
           inputTime: notificationTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        final alarmTime = _hospitalReleaseTime.add(Duration(seconds: -_hospitalNotificationAhead));
+        final alarmTime = _hospitalReleaseTime
+            .add(Duration(seconds: -_hospitalNotificationAhead));
         final formattedTimeAlarm = TimeFormatter(
           inputTime: alarmTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        final timerTime = _hospitalReleaseTime.add(Duration(seconds: -_hospitalNotificationAhead));
+        final timerTime = _hospitalReleaseTime
+            .add(Duration(seconds: -_hospitalNotificationAhead));
         final formattedTimeTimer = TimeFormatter(
           inputTime: timerTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        notificationSetString = 'Hospital release notification set for $formattedTime';
+        notificationSetString =
+            'Hospital release notification set for $formattedTime';
         notificationCancelString = 'Hospital release notification cancelled!';
         alarmSetString = 'Hospital release alarm set for $formattedTimeAlarm';
         alarmCancelString = 'Hospital release alarm cancelled!';
@@ -2880,32 +3042,37 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
       case ProfileNotification.jail:
         semanticsLabel += "for jail";
-        _jailReleaseTime = DateTime.fromMillisecondsSinceEpoch(_user!.status!.until! * 1000);
+        _jailReleaseTime =
+            DateTime.fromMillisecondsSinceEpoch(_user!.status!.until! * 1000);
         secondsToGo = _jailReleaseTime.difference(DateTime.now()).inSeconds;
         notificationsPending = _jailNotificationsPending;
 
-        final notificationTime = _jailReleaseTime.add(Duration(seconds: -_jailNotificationAhead));
+        final notificationTime =
+            _jailReleaseTime.add(Duration(seconds: -_jailNotificationAhead));
         final formattedTime = TimeFormatter(
           inputTime: notificationTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        final alarmTime = _jailReleaseTime.add(Duration(seconds: -_jailNotificationAhead));
+        final alarmTime =
+            _jailReleaseTime.add(Duration(seconds: -_jailNotificationAhead));
         final formattedTimeAlarm = TimeFormatter(
           inputTime: alarmTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        final timerTime = _jailReleaseTime.add(Duration(seconds: -_jailNotificationAhead));
+        final timerTime =
+            _jailReleaseTime.add(Duration(seconds: -_jailNotificationAhead));
         final formattedTimeTimer = TimeFormatter(
           inputTime: timerTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        notificationSetString = 'Jail release notification set for $formattedTime';
+        notificationSetString =
+            'Jail release notification set for $formattedTime';
         notificationCancelString = 'Jail release notification cancelled!';
         alarmSetString = 'Jail release alarm set for $formattedTimeAlarm';
         alarmCancelString = 'Jail release alarm cancelled!';
@@ -2915,32 +3082,37 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
       case ProfileNotification.rankedWar:
         semanticsLabel += "for war";
-        _rankedWarTime = DateTime.fromMillisecondsSinceEpoch(_factionRankedWar!.war!.start! * 1000);
+        _rankedWarTime = DateTime.fromMillisecondsSinceEpoch(
+            _factionRankedWar!.war!.start! * 1000);
         secondsToGo = _rankedWarTime.difference(DateTime.now()).inSeconds;
         notificationsPending = _rankedWarNotificationsPending;
 
-        final notificationTime = _rankedWarTime.add(Duration(seconds: -_rankedWarNotificationAhead));
+        final notificationTime =
+            _rankedWarTime.add(Duration(seconds: -_rankedWarNotificationAhead));
         final formattedTime = TimeFormatter(
           inputTime: notificationTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        final alarmTime = _rankedWarTime.add(Duration(seconds: -_rankedWarNotificationAhead));
+        final alarmTime =
+            _rankedWarTime.add(Duration(seconds: -_rankedWarNotificationAhead));
         final formattedTimeAlarm = TimeFormatter(
           inputTime: alarmTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        final timerTime = _rankedWarTime.add(Duration(seconds: -_rankedWarNotificationAhead));
+        final timerTime =
+            _rankedWarTime.add(Duration(seconds: -_rankedWarNotificationAhead));
         final formattedTimeTimer = TimeFormatter(
           inputTime: timerTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        notificationSetString = 'Ranked war notification set for $formattedTime';
+        notificationSetString =
+            'Ranked war notification set for $formattedTime';
         notificationCancelString = 'Ranked war notification cancelled!';
         alarmSetString = 'Ranked war alarm set for $formattedTimeAlarm';
         alarmCancelString = 'Ranked war alarm cancelled!';
@@ -2956,28 +3128,32 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         }
         notificationsPending = _raceStartNotificationsPending;
 
-        final notificationTime = _raceStartTime.add(Duration(seconds: -_raceStartNotificationAhead));
+        final notificationTime =
+            _raceStartTime.add(Duration(seconds: -_raceStartNotificationAhead));
         final formattedTime = TimeFormatter(
           inputTime: notificationTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        final alarmTime = _raceStartTime.add(Duration(seconds: -_raceStartNotificationAhead));
+        final alarmTime =
+            _raceStartTime.add(Duration(seconds: -_raceStartNotificationAhead));
         final formattedTimeAlarm = TimeFormatter(
           inputTime: alarmTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        final timerTime = _raceStartTime.add(Duration(seconds: -_raceStartNotificationAhead));
+        final timerTime =
+            _raceStartTime.add(Duration(seconds: -_raceStartNotificationAhead));
         final formattedTimeTimer = TimeFormatter(
           inputTime: timerTime,
           timeFormatSetting: _settingsProvider!.currentTimeFormat,
           timeZoneSetting: _settingsProvider!.currentTimeZone,
         ).formatHourWithDaysElapsed();
 
-        notificationSetString = 'Race start notification set for $formattedTime';
+        notificationSetString =
+            'Race start notification set for $formattedTime';
         notificationCancelString = 'Race start notification cancelled!';
         alarmSetString = 'Race start alarm set for $formattedTimeAlarm';
         alarmCancelString = 'Race start alarm cancelled!';
@@ -2999,7 +3175,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       return const SizedBox.shrink();
     } else {
       Color? thisColor;
-      if (notificationsPending && notificationType == NotificationType.notification) {
+      if (notificationsPending &&
+          notificationType == NotificationType.notification) {
         thisColor = Colors.green;
       } else if (notificationType == NotificationType.alarm &&
           isIOS &&
@@ -3039,7 +3216,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                     duration: const Duration(seconds: 5),
                     contentPadding: const EdgeInsets.all(10),
                   );
-                } else if (notificationsPending && notificationType == NotificationType.notification) {
+                } else if (notificationsPending &&
+                    notificationType == NotificationType.notification) {
                   _cancelNotifications(profileNotification);
                   BotToast.showText(
                     text: notificationCancelString,
@@ -3047,7 +3225,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       fontSize: 14,
                       color: Colors.white,
                     ),
-                    contentColor: _themeProvider!.getTextColor(Colors.orange[800]),
+                    contentColor:
+                        _themeProvider!.getTextColor(Colors.orange[800]),
                     duration: const Duration(seconds: 5),
                     contentPadding: const EdgeInsets.all(10),
                   );
@@ -3063,12 +3242,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       fontSize: 14,
                       color: Colors.white,
                     ),
-                    contentColor: _themeProvider!.getTextColor(Colors.orange[800]),
+                    contentColor:
+                        _themeProvider!.getTextColor(Colors.orange[800]),
                     duration: const Duration(seconds: 5),
                     contentPadding: const EdgeInsets.all(10),
                   );
                 } else {
-                  await _setAlarm(profileNotification, alarmSetString, percentageError);
+                  await _setAlarm(
+                      profileNotification, alarmSetString, percentageError);
                 }
                 break;
 
@@ -3096,7 +3277,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
   Card _coolDowns() {
     bool showEducation = false;
-    if (_settingsProvider!.educationBarEnabled && _miscModel != null && _miscModel!.education.current != null) {
+    if (_settingsProvider!.educationBarEnabled &&
+        _miscModel != null &&
+        _miscModel!.education.current != null) {
       final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       if (_miscModel!.education.current!.until > now) {
         showEducation = true;
@@ -3270,10 +3453,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     else if (_user!.cooldowns!.drug! >= 600 && _user!.cooldowns!.drug! < 3600) {
       return Image.asset('images/icons/cooldowns/drug2.png', width: 20);
     } // 1-2 hours
-    else if (_user!.cooldowns!.drug! >= 3600 && _user!.cooldowns!.drug! < 7200) {
+    else if (_user!.cooldowns!.drug! >= 3600 &&
+        _user!.cooldowns!.drug! < 7200) {
       return Image.asset('images/icons/cooldowns/drug3.png', width: 20);
     } // 2-5 hours
-    else if (_user!.cooldowns!.drug! >= 7200 && _user!.cooldowns!.drug! < 18000) {
+    else if (_user!.cooldowns!.drug! >= 7200 &&
+        _user!.cooldowns!.drug! < 18000) {
       return Image.asset('images/icons/cooldowns/drug4.png', width: 20);
     } // 5+ hours
     else {
@@ -3286,13 +3471,16 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     if (_user!.cooldowns!.medical! > 0 && _user!.cooldowns!.medical! < 5400) {
       return Image.asset('images/icons/cooldowns/medical1.png', width: 20);
     } // 90-180 minutes
-    else if (_user!.cooldowns!.medical! >= 5400 && _user!.cooldowns!.medical! < 10800) {
+    else if (_user!.cooldowns!.medical! >= 5400 &&
+        _user!.cooldowns!.medical! < 10800) {
       return Image.asset('images/icons/cooldowns/medical2.png', width: 20);
     } // 180-270 minutes
-    else if (_user!.cooldowns!.medical! >= 10800 && _user!.cooldowns!.medical! < 16200) {
+    else if (_user!.cooldowns!.medical! >= 10800 &&
+        _user!.cooldowns!.medical! < 16200) {
       return Image.asset('images/icons/cooldowns/medical3.png', width: 20);
     } // 270-360 minutes
-    else if (_user!.cooldowns!.medical! >= 16200 && _user!.cooldowns!.medical! < 21600) {
+    else if (_user!.cooldowns!.medical! >= 16200 &&
+        _user!.cooldowns!.medical! < 21600) {
       return Image.asset('images/icons/cooldowns/medical4.png', width: 20);
     } // 360+ minutes
     else {
@@ -3305,13 +3493,16 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     if (_user!.cooldowns!.booster! > 0 && _user!.cooldowns!.booster! < 21600) {
       return Image.asset('images/icons/cooldowns/booster1.png', width: 20);
     } // 6-12 hours
-    else if (_user!.cooldowns!.booster! >= 21600 && _user!.cooldowns!.booster! < 43200) {
+    else if (_user!.cooldowns!.booster! >= 21600 &&
+        _user!.cooldowns!.booster! < 43200) {
       return Image.asset('images/icons/cooldowns/booster2.png', width: 20);
     } // 12-18 hours
-    else if (_user!.cooldowns!.booster! >= 43200 && _user!.cooldowns!.booster! < 64800) {
+    else if (_user!.cooldowns!.booster! >= 43200 &&
+        _user!.cooldowns!.booster! < 64800) {
       return Image.asset('images/icons/cooldowns/booster3.png', width: 20);
     } // 18-24 hours
-    else if (_user!.cooldowns!.booster! >= 64800 && _user!.cooldowns!.booster! < 86400) {
+    else if (_user!.cooldowns!.booster! >= 64800 &&
+        _user!.cooldowns!.booster! < 86400) {
       return Image.asset('images/icons/cooldowns/booster4.png', width: 20);
     } // 24+ hours
     else {
@@ -3320,11 +3511,13 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   }
 
   Widget _educationIcon() {
-    return Icon(MdiIcons.schoolOutline, size: 20, color: _themeProvider!.mainText);
+    return Icon(MdiIcons.schoolOutline,
+        size: 20, color: _themeProvider!.mainText);
   }
 
   Widget _drugCounter() {
-    final DateTime timeEnd = _serverTime.add(Duration(seconds: _user!.cooldowns!.drug!));
+    final DateTime timeEnd =
+        _serverTime.add(Duration(seconds: _user!.cooldowns!.drug!));
 
     final formattedTime = TimeFormatter(
       inputTime: timeEnd,
@@ -3341,7 +3534,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   }
 
   Widget _medicalCounter() {
-    final timeEnd = _serverTime.add(Duration(seconds: _user!.cooldowns!.medical!));
+    final timeEnd =
+        _serverTime.add(Duration(seconds: _user!.cooldowns!.medical!));
     final formattedTime = TimeFormatter(
       inputTime: timeEnd,
       timeFormatSetting: _settingsProvider!.currentTimeFormat,
@@ -3357,7 +3551,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   }
 
   Widget _boosterCounter() {
-    final timeEnd = _serverTime.add(Duration(seconds: _user!.cooldowns!.booster!));
+    final timeEnd =
+        _serverTime.add(Duration(seconds: _user!.cooldowns!.booster!));
     final formattedTime = TimeFormatter(
       inputTime: timeEnd,
       timeFormatSetting: _settingsProvider!.currentTimeFormat,
@@ -3393,7 +3588,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   String _timeFormatted(DateTime timeEnd, {required String previous}) {
     final timeDifference = timeEnd.difference(_serverTime);
     String twoDigits(int n) => n.toString().padLeft(2, "0");
-    final String twoDigitMinutes = twoDigits(timeDifference.inMinutes.remainder(60));
+    final String twoDigitMinutes =
+        twoDigits(timeDifference.inMinutes.remainder(60));
     String diff = '';
     if (timeDifference.inMinutes < 1) {
       diff = ', in a few seconds';
@@ -3470,14 +3666,16 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       if (e.event == null) continue;
 
       // Determine font weight based on unread status
-      final FontWeight fontWeight = unreadCount! >= loopCount ? FontWeight.bold : FontWeight.normal;
+      final FontWeight fontWeight =
+          unreadCount! >= loopCount ? FontWeight.bold : FontWeight.normal;
 
       // Adapt text
       e.event = processEventMessage(e.event!);
 
       // Build the message widget
       // (the events API v1 has got many issues in http links, so we need to correct them manually)
-      final Widget messageWidget = buildEventMessageWidget(e.event!, fontWeight, _launchBrowser, _themeProvider!);
+      final Widget messageWidget = buildEventMessageWidget(
+          e.event!, fontWeight, _launchBrowser, _themeProvider!);
 
       final Widget insideIcon = EventIcons(
         message: e.event!,
@@ -3500,7 +3698,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         ),
       );
 
-      final eventTime = DateTime.fromMillisecondsSinceEpoch(e.timestamp! * 1000);
+      final eventTime =
+          DateTime.fromMillisecondsSinceEpoch(e.timestamp! * 1000);
 
       final event = TimelineTile(
         isFirst: loopCount == 1,
@@ -3575,10 +3774,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               InkWell(
                 borderRadius: BorderRadius.circular(100),
                 onLongPress: () {
-                  _launchBrowser(url: "https://www.torn.com/events.php#/step=all", shortTap: false);
+                  _launchBrowser(
+                      url: "https://www.torn.com/events.php#/step=all",
+                      shortTap: false);
                 },
                 onTap: () {
-                  _launchBrowser(url: 'https://www.torn.com/events.php#/step=all', shortTap: true);
+                  _launchBrowser(
+                      url: 'https://www.torn.com/events.php#/step=all',
+                      shortTap: true);
                 },
                 child: const Padding(
                   padding: EdgeInsets.only(right: 5),
@@ -3596,7 +3799,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               color: unreadCount == 0
                   ? _themeProvider!.getTextColor(Colors.green)
                   : _themeProvider!.getTextColor(Colors.red),
-              fontWeight: unreadCount == 0 ? FontWeight.normal : FontWeight.bold,
+              fontWeight:
+                  unreadCount == 0 ? FontWeight.normal : FontWeight.bold,
             ),
           ),
         ),
@@ -3719,7 +3923,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         ),
       );
 
-      final messageTime = DateTime.fromMillisecondsSinceEpoch(msg.timestamp * 1000);
+      final messageTime =
+          DateTime.fromMillisecondsSinceEpoch(msg.timestamp * 1000);
 
       final messageRow = TimelineTile(
         isFirst: loopCount == 1 ? true : false,
@@ -3738,11 +3943,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        msg.name ?? "Torn", // Torn staff might send messages with null sender!
+                        msg.name ??
+                            "Torn", // Torn staff might send messages with null sender!
                         style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            fontStyle: msg.name == null ? FontStyle.italic : FontStyle.normal),
+                            fontStyle: msg.name == null
+                                ? FontStyle.italic
+                                : FontStyle.normal),
                       ),
                       Text(
                         title,
@@ -3842,7 +4050,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     }
 
     var unreadTotalString = '';
-    final lastMessageDate = DateTime.fromMillisecondsSinceEpoch(messages.values.last.timestamp * 1000);
+    final lastMessageDate = DateTime.fromMillisecondsSinceEpoch(
+        messages.values.last.timestamp * 1000);
     if (unreadTotalCount == 0) {
       unreadTotalString = 'No unread messages '
           '(since ${_occurrenceTimeFormatted(lastMessageDate)})';
@@ -3873,10 +4082,13 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               InkWell(
                 borderRadius: BorderRadius.circular(100),
                 onLongPress: () {
-                  _launchBrowser(url: "https://www.torn.com/messages.php", shortTap: false);
+                  _launchBrowser(
+                      url: "https://www.torn.com/messages.php",
+                      shortTap: false);
                 },
                 onTap: () {
-                  _launchBrowser(url: "https://www.torn.com/messages.php", shortTap: true);
+                  _launchBrowser(
+                      url: "https://www.torn.com/messages.php", shortTap: true);
                 },
                 child: const Padding(
                   padding: EdgeInsets.only(right: 5),
@@ -3897,7 +4109,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                   color: unreadRecentCount == 0
                       ? _themeProvider!.getTextColor(Colors.green)
                       : _themeProvider!.getTextColor(Colors.red),
-                  fontWeight: unreadRecentCount == 0 ? FontWeight.normal : FontWeight.bold,
+                  fontWeight: unreadRecentCount == 0
+                      ? FontWeight.normal
+                      : FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 4),
@@ -4056,7 +4270,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     int? totalEffectiveModifier;
     if (_miscModel!.battleStats?.total != null) {
       totalEffectiveModifier =
-          ((totalEffective - _miscModel!.battleStats!.total!) * 100 / _miscModel!.battleStats!.total!).round();
+          ((totalEffective - _miscModel!.battleStats!.total!) *
+                  100 /
+                  _miscModel!.battleStats!.total!)
+              .round();
     }
 
     String formatStatsPercent(int? stat, int? total) {
@@ -4102,14 +4319,21 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       crimesExist = true;
     }
 
-    if (hunting.isNotEmpty || racing.isNotEmpty || reviving.isNotEmpty || crimesExist) {
+    if (hunting.isNotEmpty ||
+        racing.isNotEmpty ||
+        reviving.isNotEmpty ||
+        crimesExist) {
       skillsExist = true;
     }
 
-    _sharedEffStrength = 'Strength: ${decimalFormat.format(strengthModifiedTotal)} $strengthString';
-    _sharedEffDefense = 'Defense: ${decimalFormat.format(defenseModifiedTotal)} $defenseString';
-    _sharedEffSpeed = 'Speed: ${decimalFormat.format(speedModifiedTotal)} $speedString';
-    _sharedEffDexterity = 'Dexterity: ${decimalFormat.format(dexModifiedTotal)} $dexString';
+    _sharedEffStrength =
+        'Strength: ${decimalFormat.format(strengthModifiedTotal)} $strengthString';
+    _sharedEffDefense =
+        'Defense: ${decimalFormat.format(defenseModifiedTotal)} $defenseString';
+    _sharedEffSpeed =
+        'Speed: ${decimalFormat.format(speedModifiedTotal)} $speedString';
+    _sharedEffDexterity =
+        'Dexterity: ${decimalFormat.format(dexModifiedTotal)} $dexString';
     _sharedEffTotal = 'Total: ${decimalFormat.format(totalEffective)}';
 
     return Semantics(
@@ -4149,16 +4373,21 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                   _cashWallet(dense: false),
                   const SizedBox(height: 4),
                   Semantics(
-                    label: "${_miscModel!.money?.points ?? '(error)'} Torn Points, tap to open",
+                    label:
+                        "${_miscModel!.money?.points ?? '(error)'} Torn Points, tap to open",
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         GestureDetector(
                           onLongPress: () {
-                            _launchBrowser(url: 'https://www.torn.com/points.php', shortTap: false);
+                            _launchBrowser(
+                                url: 'https://www.torn.com/points.php',
+                                shortTap: false);
                           },
                           onTap: () async {
-                            _launchBrowser(url: 'https://www.torn.com/points.php', shortTap: true);
+                            _launchBrowser(
+                                url: 'https://www.torn.com/points.php',
+                                shortTap: true);
                           },
                           child: const Icon(
                             MdiIcons.alphaPCircleOutline,
@@ -4215,22 +4444,30 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                   ),
                   const SizedBox(height: 2),
                   SelectionArea(
-                      child: Text('Battle Stats: ${decimalFormat.format(_miscModel!.battleStats?.total ?? 0)}')),
-                  if (_settingsProvider!.tornStatsChartEnabled && _settingsProvider!.tornStatsChartInCollapsedMiscCard)
+                      child: Text(
+                          'Battle Stats: ${decimalFormat.format(_miscModel!.battleStats?.total ?? 0)}')),
+                  if (_settingsProvider!.tornStatsChartEnabled &&
+                      _settingsProvider!.tornStatsChartInCollapsedMiscCard)
                     FutureBuilder(
                       future: _statsChartDataFetched,
-                      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                      builder: (BuildContext context,
+                          AsyncSnapshot<dynamic> snapshot) {
                         if (snapshot.connectionState == ConnectionState.done) {
                           if (_statsChartModel?.data != null) {
                             return Column(
                               children: [
                                 const SizedBox(height: 20),
                                 SizedBox(
-                                  height: _settingsProvider!.tornStatsChartShowBoth ? 400 : 200,
+                                  height:
+                                      _settingsProvider!.tornStatsChartShowBoth
+                                          ? 400
+                                          : 200,
                                   child: ExcludeSemantics(
                                     child: StatsChart(
                                       statsData: _statsChartModel,
-                                      chartType: _settingsProvider!.tornStatsChartType == "line"
+                                      chartType: _settingsProvider!
+                                                  .tornStatsChartType ==
+                                              "line"
                                           ? TornStatsChartType.Line
                                           : TornStatsChartType.Pie,
                                       userController: _u,
@@ -4244,7 +4481,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                             );
                           } else if (_statsChartError != null) {
                             return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 15.0),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 15.0),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
@@ -4258,7 +4496,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                     child: Text(
                                       _statsChartError!,
                                       style: TextStyle(
-                                        color: _themeProvider!.getTextColor(Colors.red),
+                                        color: _themeProvider!
+                                            .getTextColor(Colors.red),
                                         fontSize: 12,
                                       ),
                                     ),
@@ -4273,9 +4512,15 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                     )
                   else
                     const SizedBox(height: 8),
-                  SelectionArea(child: Text('MAN: ${decimalFormat.format(_miscModel!.workStats?.manualLabor ?? 0)}')),
-                  SelectionArea(child: Text('INT: ${decimalFormat.format(_miscModel!.workStats?.intelligence ?? 0)}')),
-                  SelectionArea(child: Text('END: ${decimalFormat.format(_miscModel!.workStats?.endurance ?? 0)}')),
+                  SelectionArea(
+                      child: Text(
+                          'MAN: ${decimalFormat.format(_miscModel!.workStats?.manualLabor ?? 0)}')),
+                  SelectionArea(
+                      child: Text(
+                          'INT: ${decimalFormat.format(_miscModel!.workStats?.intelligence ?? 0)}')),
+                  SelectionArea(
+                      child: Text(
+                          'END: ${decimalFormat.format(_miscModel!.workStats?.endurance ?? 0)}')),
                 ],
               ),
             ),
@@ -4309,10 +4554,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                             label: "Open Torn Points",
                             child: GestureDetector(
                               onLongPress: () {
-                                _launchBrowser(url: 'https://www.torn.com/points.php', shortTap: false);
+                                _launchBrowser(
+                                    url: 'https://www.torn.com/points.php',
+                                    shortTap: false);
                               },
                               onTap: () async {
-                                _launchBrowser(url: 'https://www.torn.com/points.php', shortTap: true);
+                                _launchBrowser(
+                                    url: 'https://www.torn.com/points.php',
+                                    shortTap: true);
                               },
                               child: const Icon(
                                 MdiIcons.alphaPCircleOutline,
@@ -4321,7 +4570,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                             ),
                           ),
                           const SizedBox(width: 5),
-                          SelectionArea(child: Text('${_miscModel!.money?.points ?? '(error)'}')),
+                          SelectionArea(
+                              child: Text(
+                                  '${_miscModel!.money?.points ?? '(error)'}')),
                         ],
                       ),
                     ),
@@ -4375,13 +4626,15 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                 child: Text(
                                   strengthString.contains("error")
                                       ? '(error)'
-                                      : decimalFormat.format(strengthModifiedTotal),
+                                      : decimalFormat
+                                          .format(strengthModifiedTotal),
                                 ),
                               ),
                               if (strengthModified)
                                 Text(
                                   " $strengthString",
-                                  style: TextStyle(color: strengthColor, fontSize: 12),
+                                  style: TextStyle(
+                                      color: strengthColor, fontSize: 12),
                                 )
                               else
                                 const SizedBox.shrink(),
@@ -4397,13 +4650,15 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                 child: Text(
                                   defenseString.contains("error")
                                       ? '(error)'
-                                      : decimalFormat.format(defenseModifiedTotal),
+                                      : decimalFormat
+                                          .format(defenseModifiedTotal),
                                 ),
                               ),
                               if (defenseModified)
                                 Text(
                                   " $defenseString",
-                                  style: TextStyle(color: defenseColor, fontSize: 12),
+                                  style: TextStyle(
+                                      color: defenseColor, fontSize: 12),
                                 )
                               else
                                 const SizedBox.shrink(),
@@ -4417,13 +4672,17 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                               ),
                               SelectionArea(
                                 child: Text(
-                                  speedString.contains("error") ? '(error)' : decimalFormat.format(speedModifiedTotal),
+                                  speedString.contains("error")
+                                      ? '(error)'
+                                      : decimalFormat
+                                          .format(speedModifiedTotal),
                                 ),
                               ),
                               if (speedModified)
                                 Text(
                                   " $speedString",
-                                  style: TextStyle(color: speedColor, fontSize: 12),
+                                  style: TextStyle(
+                                      color: speedColor, fontSize: 12),
                                 )
                               else
                                 const SizedBox.shrink(),
@@ -4437,13 +4696,16 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                               ),
                               SelectionArea(
                                 child: Text(
-                                  dexString.contains("error") ? '(error)' : decimalFormat.format(dexModifiedTotal),
+                                  dexString.contains("error")
+                                      ? '(error)'
+                                      : decimalFormat.format(dexModifiedTotal),
                                 ),
                               ),
                               if (dexModified)
                                 Text(
                                   " $dexString",
-                                  style: TextStyle(color: dexColor, fontSize: 12),
+                                  style:
+                                      TextStyle(color: dexColor, fontSize: 12),
                                 )
                               else
                                 const SizedBox.shrink(),
@@ -4451,7 +4713,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                           ),
                           SizedBox(
                             width: 50,
-                            child: Divider(color: _themeProvider!.mainText, thickness: 0.5),
+                            child: Divider(
+                                color: _themeProvider!.mainText,
+                                thickness: 0.5),
                           ),
                           Row(
                             children: [
@@ -4503,24 +4767,34 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                         children: [
                           Row(
                             children: [
-                              const SizedBox(width: 80, child: Text('Strength: ')),
+                              const SizedBox(
+                                  width: 80, child: Text('Strength: ')),
                               SelectionArea(
-                                  child: Text(decimalFormat.format(_miscModel!.battleStats?.strength?.value ?? 0))),
+                                  child: Text(decimalFormat.format(_miscModel!
+                                          .battleStats?.strength?.value ??
+                                      0))),
                               Text(
                                 formatStatsPercent(
-                                    _miscModel!.battleStats?.strength?.value.toInt(), _miscModel!.battleStats?.total),
+                                    _miscModel!.battleStats?.strength?.value
+                                        .toInt(),
+                                    _miscModel!.battleStats?.total),
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ],
                           ),
                           Row(
                             children: [
-                              const SizedBox(width: 80, child: Text('Defense: ')),
+                              const SizedBox(
+                                  width: 80, child: Text('Defense: ')),
                               SelectionArea(
-                                  child: Text(decimalFormat.format(_miscModel!.battleStats?.defense?.value ?? 0))),
+                                  child: Text(decimalFormat.format(
+                                      _miscModel!.battleStats?.defense?.value ??
+                                          0))),
                               Text(
                                 formatStatsPercent(
-                                    _miscModel!.battleStats?.defense?.value.toInt(), _miscModel!.battleStats?.total),
+                                    _miscModel!.battleStats?.defense?.value
+                                        .toInt(),
+                                    _miscModel!.battleStats?.total),
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ],
@@ -4529,29 +4803,40 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                             children: [
                               const SizedBox(width: 80, child: Text('Speed: ')),
                               SelectionArea(
-                                  child: Text(decimalFormat.format(_miscModel!.battleStats?.speed?.value ?? 0))),
+                                  child: Text(decimalFormat.format(
+                                      _miscModel!.battleStats?.speed?.value ??
+                                          0))),
                               Text(
                                 formatStatsPercent(
-                                    _miscModel!.battleStats?.speed?.value.toInt(), _miscModel!.battleStats?.total),
+                                    _miscModel!.battleStats?.speed?.value
+                                        .toInt(),
+                                    _miscModel!.battleStats?.total),
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ],
                           ),
                           Row(
                             children: [
-                              const SizedBox(width: 80, child: Text('Dexterity: ')),
+                              const SizedBox(
+                                  width: 80, child: Text('Dexterity: ')),
                               SelectionArea(
-                                  child: Text(decimalFormat.format(_miscModel!.battleStats?.dexterity?.value ?? 0))),
+                                  child: Text(decimalFormat.format(_miscModel!
+                                          .battleStats?.dexterity?.value ??
+                                      0))),
                               Text(
                                 formatStatsPercent(
-                                    _miscModel!.battleStats?.dexterity?.value.toInt(), _miscModel!.battleStats?.total),
+                                    _miscModel!.battleStats?.dexterity?.value
+                                        .toInt(),
+                                    _miscModel!.battleStats?.total),
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ],
                           ),
                           SizedBox(
                             width: 50,
-                            child: Divider(color: _themeProvider!.mainText, thickness: 0.5),
+                            child: Divider(
+                                color: _themeProvider!.mainText,
+                                thickness: 0.5),
                           ),
                           Row(
                             children: [
@@ -4559,7 +4844,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                 width: 80,
                                 child: Text('Total: '),
                               ),
-                              SelectionArea(child: Text(decimalFormat.format(_miscModel!.battleStats?.total ?? 0))),
+                              SelectionArea(
+                                  child: Text(decimalFormat.format(
+                                      _miscModel!.battleStats?.total ?? 0))),
                             ],
                           ),
                         ],
@@ -4568,18 +4855,25 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                     if (_settingsProvider!.tornStatsChartEnabled)
                       FutureBuilder(
                         future: _statsChartDataFetched,
-                        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                          if (snapshot.connectionState == ConnectionState.done) {
+                        builder: (BuildContext context,
+                            AsyncSnapshot<dynamic> snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.done) {
                             if (_statsChartModel?.data != null) {
                               return Column(
                                 children: [
                                   const SizedBox(height: 40),
                                   SizedBox(
-                                    height: _settingsProvider!.tornStatsChartShowBoth ? 400 : 200,
+                                    height: _settingsProvider!
+                                            .tornStatsChartShowBoth
+                                        ? 400
+                                        : 200,
                                     child: ExcludeSemantics(
                                       child: StatsChart(
                                         statsData: _statsChartModel,
-                                        chartType: _settingsProvider!.tornStatsChartType == "line"
+                                        chartType: _settingsProvider!
+                                                    .tornStatsChartType ==
+                                                "line"
                                             ? TornStatsChartType.Line
                                             : TornStatsChartType.Pie,
                                         userController: _u,
@@ -4606,7 +4900,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                     Text(
                                       _statsChartError!,
                                       style: TextStyle(
-                                        color: _themeProvider!.getTextColor(Colors.red),
+                                        color: _themeProvider!
+                                            .getTextColor(Colors.red),
                                         fontSize: 12,
                                       ),
                                     ),
@@ -4652,7 +4947,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                 width: 100,
                                 child: Text('Manual labor: '),
                               ),
-                              SelectionArea(child: Text(decimalFormat.format(_miscModel!.workStats?.manualLabor ?? 0))),
+                              SelectionArea(
+                                  child: Text(decimalFormat.format(
+                                      _miscModel!.workStats?.manualLabor ??
+                                          0))),
                             ],
                           ),
                           Row(
@@ -4662,7 +4960,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                 child: Text('Intelligence: '),
                               ),
                               SelectionArea(
-                                  child: Text(decimalFormat.format(_miscModel!.workStats?.intelligence ?? 0))),
+                                  child: Text(decimalFormat.format(
+                                      _miscModel!.workStats?.intelligence ??
+                                          0))),
                             ],
                           ),
                           Row(
@@ -4671,7 +4971,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                 width: 100,
                                 child: Text('Endurance: '),
                               ),
-                              SelectionArea(child: Text(decimalFormat.format(_miscModel!.workStats?.endurance ?? 0))),
+                              SelectionArea(
+                                  child: Text(decimalFormat.format(
+                                      _miscModel!.workStats?.endurance ?? 0))),
                             ],
                           ),
                         ],
@@ -4762,7 +5064,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                         searchForCash,
                                         style: TextStyle(
                                           color: searchForCash == "100"
-                                              ? _themeProvider!.getTextColor(Colors.green)
+                                              ? _themeProvider!
+                                                  .getTextColor(Colors.green)
                                               : null,
                                         ),
                                       ),
@@ -4781,7 +5084,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                           bootlegging,
                                           style: TextStyle(
                                             color: bootlegging == "100"
-                                                ? _themeProvider!.getTextColor(Colors.green)
+                                                ? _themeProvider!
+                                                    .getTextColor(Colors.green)
                                                 : null,
                                           ),
                                         ),
@@ -4799,8 +5103,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                         child: Text(
                                           graffiti,
                                           style: TextStyle(
-                                            color:
-                                                graffiti == "100" ? _themeProvider!.getTextColor(Colors.green) : null,
+                                            color: graffiti == "100"
+                                                ? _themeProvider!
+                                                    .getTextColor(Colors.green)
+                                                : null,
                                           ),
                                         ),
                                       ),
@@ -4818,7 +5124,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                           shoplifting,
                                           style: TextStyle(
                                             color: shoplifting == "100"
-                                                ? _themeProvider!.getTextColor(Colors.green)
+                                                ? _themeProvider!
+                                                    .getTextColor(Colors.green)
                                                 : null,
                                           ),
                                         ),
@@ -4837,7 +5144,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                           pickpocketing,
                                           style: TextStyle(
                                             color: pickpocketing == "100"
-                                                ? _themeProvider!.getTextColor(Colors.green)
+                                                ? _themeProvider!
+                                                    .getTextColor(Colors.green)
                                                 : null,
                                           ),
                                         ),
@@ -4856,7 +5164,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                           cardSkimming,
                                           style: TextStyle(
                                             color: cardSkimming == "100"
-                                                ? _themeProvider!.getTextColor(Colors.green)
+                                                ? _themeProvider!
+                                                    .getTextColor(Colors.green)
                                                 : null,
                                           ),
                                         ),
@@ -4874,8 +5183,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                         child: Text(
                                           burglary,
                                           style: TextStyle(
-                                            color:
-                                                burglary == "100" ? _themeProvider!.getTextColor(Colors.green) : null,
+                                            color: burglary == "100"
+                                                ? _themeProvider!
+                                                    .getTextColor(Colors.green)
+                                                : null,
                                           ),
                                         ),
                                       ),
@@ -4892,8 +5203,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                         child: Text(
                                           hustling,
                                           style: TextStyle(
-                                            color:
-                                                hustling == "100" ? _themeProvider!.getTextColor(Colors.green) : null,
+                                            color: hustling == "100"
+                                                ? _themeProvider!
+                                                    .getTextColor(Colors.green)
+                                                : null,
                                           ),
                                         ),
                                       ),
@@ -4910,8 +5223,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                         child: Text(
                                           disposal,
                                           style: TextStyle(
-                                            color:
-                                                disposal == "100" ? _themeProvider!.getTextColor(Colors.green) : null,
+                                            color: disposal == "100"
+                                                ? _themeProvider!
+                                                    .getTextColor(Colors.green)
+                                                : null,
                                           ),
                                         ),
                                       ),
@@ -4928,8 +5243,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                         child: Text(
                                           cracking,
                                           style: TextStyle(
-                                            color:
-                                                cracking == "100" ? _themeProvider!.getTextColor(Colors.green) : null,
+                                            color: cracking == "100"
+                                                ? _themeProvider!
+                                                    .getTextColor(Colors.green)
+                                                : null,
                                           ),
                                         ),
                                       ),
@@ -4946,7 +5263,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                         child: Text(
                                           forgery,
                                           style: TextStyle(
-                                            color: forgery == "100" ? _themeProvider!.getTextColor(Colors.green) : null,
+                                            color: forgery == "100"
+                                                ? _themeProvider!
+                                                    .getTextColor(Colors.green)
+                                                : null,
                                           ),
                                         ),
                                       ),
@@ -4963,8 +5283,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                         child: Text(
                                           scamming,
                                           style: TextStyle(
-                                            color:
-                                                scamming == "100" ? _themeProvider!.getTextColor(Colors.green) : null,
+                                            color: scamming == "100"
+                                                ? _themeProvider!
+                                                    .getTextColor(Colors.green)
+                                                : null,
                                           ),
                                         ),
                                       ),
@@ -4981,7 +5303,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                         child: Text(
                                           arson,
                                           style: TextStyle(
-                                            color: arson == "100" ? _themeProvider!.getTextColor(Colors.green) : null,
+                                            color: arson == "100"
+                                                ? _themeProvider!
+                                                    .getTextColor(Colors.green)
+                                                : null,
                                           ),
                                         ),
                                       ),
@@ -5017,7 +5342,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               value: '',
               onTapHint: 'Open wallet dialog',
               child: dense!
-                  ? const Icon(Icons.account_balance_wallet_rounded, size: 17, color: Colors.brown)
+                  ? const Icon(Icons.account_balance_wallet_rounded,
+                      size: 17, color: Colors.brown)
                   : const Icon(
                       MdiIcons.cash100,
                       color: Colors.green,
@@ -5031,7 +5357,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               style: TextStyle(
                 fontSize: dense ? 13 : 14,
                 fontWeight: dense ? FontWeight.bold : FontWeight.normal,
-                color: dense ? _themeProvider!.getTextColor(Colors.green) : _themeProvider!.mainText,
+                color: dense
+                    ? _themeProvider!.getTextColor(Colors.green)
+                    : _themeProvider!.mainText,
               ),
             ),
           ),
@@ -5065,7 +5393,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     // JOBLESS
     Widget joblessWidget = const SizedBox.shrink();
     bool joblessActive = false;
-    if (_settingsProvider!.joblessWarningEnabled && (_user!.job?.companyId == 0 && _user!.job?.job == "None")) {
+    if (_settingsProvider!.joblessWarningEnabled &&
+        (_user!.job?.companyId == 0 && _user!.job?.job == "None")) {
       showMisc = true;
       joblessActive = true;
       joblessWidget = Row(
@@ -5077,7 +5406,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               text: TextSpan(
                 style: DefaultTextStyle.of(context).style,
                 children: [
-                  const TextSpan(text: "You don't have a job! You can get one in the "),
+                  const TextSpan(
+                      text: "You don't have a job! You can get one in the "),
                   TextSpan(
                     text: "newspaper",
                     style: const TextStyle(
@@ -5086,7 +5416,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
-                        _launchBrowser(url: 'https://www.torn.com/joblist.php#!p=main', shortTap: true);
+                        _launchBrowser(
+                            url: 'https://www.torn.com/joblist.php#!p=main',
+                            shortTap: true);
                       },
                   ),
                   const TextSpan(text: "or in the "),
@@ -5098,7 +5430,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
-                        _launchBrowser(url: 'https://www.torn.com/forums.php#/p=forums&f=46&b=0&a=0', shortTap: true);
+                        _launchBrowser(
+                            url:
+                                'https://www.torn.com/forums.php#/p=forums&f=46&b=0&a=0',
+                            shortTap: true);
                       },
                   ),
                   const TextSpan(text: "."),
@@ -5200,10 +5535,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 InkWell(
                   borderRadius: BorderRadius.circular(100),
                   onLongPress: () {
-                    _launchBrowser(url: 'https://www.torn.com/loader.php?sid=racing', shortTap: false);
+                    _launchBrowser(
+                        url: 'https://www.torn.com/loader.php?sid=racing',
+                        shortTap: false);
                   },
                   onTap: () {
-                    _launchBrowser(url: 'https://www.torn.com/loader.php?sid=racing', shortTap: true);
+                    _launchBrowser(
+                        url: 'https://www.torn.com/loader.php?sid=racing',
+                        shortTap: true);
                   },
                   child: const Padding(
                     padding: EdgeInsets.only(left: 5),
@@ -5218,10 +5557,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(100),
                   onLongPress: () {
-                    _launchBrowser(url: 'https://www.torn.com/loader.php?sid=racing', shortTap: false);
+                    _launchBrowser(
+                        url: 'https://www.torn.com/loader.php?sid=racing',
+                        shortTap: false);
                   },
                   onTap: () {
-                    _launchBrowser(url: 'https://www.torn.com/loader.php?sid=racing', shortTap: true);
+                    _launchBrowser(
+                        url: 'https://www.torn.com/loader.php?sid=racing',
+                        shortTap: true);
                   },
                   child: Padding(
                     padding: const EdgeInsets.only(left: 5),
@@ -5278,10 +5621,16 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 InkWell(
                   borderRadius: BorderRadius.circular(100),
                   onLongPress: () {
-                    _launchBrowser(url: "https://www.torn.com/factions.php?step=your#/tab=crimes", shortTap: false);
+                    _launchBrowser(
+                        url:
+                            "https://www.torn.com/factions.php?step=your#/tab=crimes",
+                        shortTap: false);
                   },
                   onTap: () {
-                    _launchBrowser(url: 'https://www.torn.com/factions.php?step=your#/tab=crimes', shortTap: true);
+                    _launchBrowser(
+                        url:
+                            'https://www.torn.com/factions.php?step=your#/tab=crimes',
+                        shortTap: true);
                   },
                   child: const Padding(
                     padding: EdgeInsets.only(right: 5),
@@ -5302,17 +5651,26 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               Flexible(
                 child: Text(
                   _ocSimpleStringFinal,
-                  style: TextStyle(color: _ocSimpleReady ? Colors.orange[700] : _themeProvider!.mainText),
+                  style: TextStyle(
+                      color: _ocSimpleReady
+                          ? Colors.orange[700]
+                          : _themeProvider!.mainText),
                 ),
               ),
               if (_ocComplexReady)
                 InkWell(
                   borderRadius: BorderRadius.circular(100),
                   onLongPress: () {
-                    _launchBrowser(url: "https://www.torn.com/factions.php?step=your#/tab=crimes", shortTap: false);
+                    _launchBrowser(
+                        url:
+                            "https://www.torn.com/factions.php?step=your#/tab=crimes",
+                        shortTap: false);
                   },
                   onTap: () {
-                    _launchBrowser(url: 'https://www.torn.com/factions.php?step=your#/tab=crimes', shortTap: true);
+                    _launchBrowser(
+                        url:
+                            'https://www.torn.com/factions.php?step=your#/tab=crimes',
+                        shortTap: true);
                   },
                   child: const Padding(
                     padding: EdgeInsets.only(right: 5),
@@ -5323,7 +5681,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 child: Icon(
                   MdiIcons.closeCircleOutline,
                   size: 16,
-                  color: _ocSimpleReady ? Colors.orange[700] : _themeProvider!.mainText,
+                  color: _ocSimpleReady
+                      ? Colors.orange[700]
+                      : _themeProvider!.mainText,
                 ),
                 onTap: () {
                   showDialog(
@@ -5352,7 +5712,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         showMisc = true;
         bankActive = true;
         final moneyFormat = NumberFormat("#,##0", "en_US");
-        final timeExpiry = DateTime.fromMillisecondsSinceEpoch(bankUntil * 1000);
+        final timeExpiry =
+            DateTime.fromMillisecondsSinceEpoch(bankUntil * 1000);
         final timeDifference = timeExpiry.difference(DateTime.now());
         Color? expiryColor = _themeProvider?.getTextColor(Colors.orange[800]);
         String expiryString;
@@ -5366,7 +5727,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           expiryString = '1 day and ${timeDifference.inHours % 24} hours';
           expiryColor = _themeProvider?.mainText;
         } else {
-          expiryString = '${timeDifference.inDays} days and ${timeDifference.inHours % 24} hours';
+          expiryString =
+              '${timeDifference.inDays} days and ${timeDifference.inHours % 24} hours';
           expiryColor = _themeProvider?.mainText;
         }
 
@@ -5386,7 +5748,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       style: DefaultTextStyle.of(context).style,
                       children: <TextSpan>[
                         TextSpan(
-                          text: bankAmount != null ? "\$${moneyFormat.format(bankAmount)}" : "(error)",
+                          text: bankAmount != null
+                              ? "\$${moneyFormat.format(bankAmount)}"
+                              : "(error)",
                           style: TextStyle(
                             color: bankAmount != null
                                 ? _themeProvider?.getTextColor(Colors.green)
@@ -5416,7 +5780,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       final currentEducation = _miscModel?.education.current;
 
       if (currentEducation != null) {
-        final timeExpiry = DateTime.fromMillisecondsSinceEpoch(currentEducation.until * 1000);
+        final timeExpiry =
+            DateTime.fromMillisecondsSinceEpoch(currentEducation.until * 1000);
         final timeDifference = timeExpiry.difference(DateTime.now());
 
         if (!timeDifference.isNegative) {
@@ -5477,7 +5842,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
       if (!educationActive) {
         final completedCourses = _miscModel?.education.complete ?? [];
-        if (completedCourses.length < _tornEducationModel!.education.length - 1) {
+        if (completedCourses.length <
+            _tornEducationModel!.education.length - 1) {
           showMisc = true;
           educationActive = true;
           educationWidget = Row(
@@ -5487,7 +5853,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               Flexible(
                 child: Text(
                   "You are not enrolled in any education course!",
-                  style: TextStyle(color: _themeProvider!.getTextColor(Colors.red[500])),
+                  style: TextStyle(
+                      color: _themeProvider!.getTextColor(Colors.red[500])),
                 ),
               )
             ],
@@ -5512,8 +5879,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       if (_user!.icons.icon3 != null) {
         donatorString = _user!.icons.icon3;
       } else if (_user!.icons.icon4 != null) {
-        donatorString = _user!.icons.icon4.replaceAll("Subscriber - Donator status:", "Donator:");
-        donatorString = donatorString!.replaceAll("Donator status:", "Donator:");
+        donatorString = _user!.icons.icon4
+            .replaceAll("Subscriber - Donator status:", "Donator:");
+        donatorString =
+            donatorString!.replaceAll("Donator status:", "Donator:");
       }
 
       donatorWidget = Semantics(
@@ -5560,42 +5929,50 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                   ),
                   if (joblessActive)
                     Padding(
-                      padding: const EdgeInsets.only(left: 8, top: 5, bottom: 5),
+                      padding:
+                          const EdgeInsets.only(left: 8, top: 5, bottom: 5),
                       child: joblessWidget,
                     ),
                   if (addictionActive)
                     Padding(
-                      padding: const EdgeInsets.only(left: 8, top: 5, bottom: 5),
+                      padding:
+                          const EdgeInsets.only(left: 8, top: 5, bottom: 5),
                       child: addictionWidget,
                     ),
                   if (racingActive)
                     Padding(
-                      padding: const EdgeInsets.only(left: 8, top: 5, bottom: 5),
+                      padding:
+                          const EdgeInsets.only(left: 8, top: 5, bottom: 5),
                       child: racingWidget,
                     ),
                   if (factionCrimesActive && _settingsProvider!.oCrimesEnabled)
                     Padding(
-                      padding: const EdgeInsets.only(left: 8, top: 5, bottom: 5),
+                      padding:
+                          const EdgeInsets.only(left: 8, top: 5, bottom: 5),
                       child: factionCrimes,
                     ),
                   if (bankActive)
                     Padding(
-                      padding: const EdgeInsets.only(left: 8, top: 5, bottom: 5),
+                      padding:
+                          const EdgeInsets.only(left: 8, top: 5, bottom: 5),
                       child: bankWidget,
                     ),
                   if (educationActive)
                     Padding(
-                      padding: const EdgeInsets.only(left: 8, top: 5, bottom: 5),
+                      padding:
+                          const EdgeInsets.only(left: 8, top: 5, bottom: 5),
                       child: educationWidget,
                     ),
                   if (propertyActive)
                     Padding(
-                      padding: const EdgeInsets.only(left: 8, top: 5, bottom: 5),
+                      padding:
+                          const EdgeInsets.only(left: 8, top: 5, bottom: 5),
                       child: _rentedPropertiesWidget,
                     ),
                   if (donatorActive)
                     Padding(
-                      padding: const EdgeInsets.only(left: 8, top: 5, bottom: 5),
+                      padding:
+                          const EdgeInsets.only(left: 8, top: 5, bottom: 5),
                       child: donatorWidget,
                     ),
                 ],
@@ -5623,7 +6000,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     final moneySources = <Widget>[];
     final moneyQuantities = <Widget>[];
 
-    final timestamp = DateTime.fromMillisecondsSinceEpoch(_user!.networth!['timestamp']!.round() * 1000);
+    final timestamp = DateTime.fromMillisecondsSinceEpoch(
+        _user!.networth!['timestamp']!.round() * 1000);
     final formattedTimestamp = TimeFormatter(
             inputTime: timestamp,
             timeFormatSetting: _settingsProvider!.currentTimeFormat,
@@ -5654,10 +6032,13 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       }
 
       Widget pointsPrice = const SizedBox.shrink();
-      if (v.key == "points" && _miscModel != null && (_miscModel?.money?.points ?? 0) > 0) {
+      if (v.key == "points" &&
+          _miscModel != null &&
+          (_miscModel?.money?.points ?? 0) > 0) {
         final points = _miscModel!.money!.points;
         if (points != null && points > 0) {
-          String price = formatBigNumbers(((v.value!.round()) / points).round());
+          String price =
+              formatBigNumbers(((v.value!.round()) / points).round());
 
           pointsPrice = Text(
             " @ \$$price",
@@ -5691,7 +6072,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         Text(
           '\$${moneyFormat.format(v.value!.round())}',
           style: TextStyle(
-            color: v.value! < 0 ? _themeProvider!.getTextColor(Colors.red) : _themeProvider!.getTextColor(Colors.green),
+            color: v.value! < 0
+                ? _themeProvider!.getTextColor(Colors.red)
+                : _themeProvider!.getTextColor(Colors.green),
           ),
         ),
       );
@@ -5779,8 +6162,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color:
-                    total <= 0 ? _themeProvider!.getTextColor(Colors.red) : _themeProvider!.getTextColor(Colors.green),
+                color: total <= 0
+                    ? _themeProvider!.getTextColor(Colors.red)
+                    : _themeProvider!.getTextColor(Colors.green),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -5816,15 +6200,18 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         if (apiResponse is OwnProfileExtended) {
           _apiRetries = 0;
           _user = apiResponse;
-          _serverTime = DateTime.fromMillisecondsSinceEpoch(_user!.serverTime! * 1000);
+          _serverTime =
+              DateTime.fromMillisecondsSinceEpoch(_user!.serverTime! * 1000);
           _apiGoodData = true;
 
           // If max values have decreased or were never initialized
-          if (_customEnergyTrigger! > _user!.energy!.maximum! || _customEnergyTrigger == 0) {
+          if (_customEnergyTrigger! > _user!.energy!.maximum! ||
+              _customEnergyTrigger == 0) {
             _customEnergyTrigger = _user!.energy!.maximum;
             Prefs().setEnergyNotificationValue(_customEnergyTrigger!);
           }
-          if (_customNerveTrigger! > _user!.nerve!.maximum! || _customNerveTrigger == 0) {
+          if (_customNerveTrigger! > _user!.nerve!.maximum! ||
+              _customNerveTrigger == 0) {
             _customNerveTrigger = _user!.nerve!.maximum;
             Prefs().setNerveNotificationValue(_customNerveTrigger!);
           }
@@ -5866,19 +6253,23 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               );
             }
 
-            bars_model.BarsStatusCooldownsModel externalStatusModel = bars_model.BarsStatusCooldownsModel()
-              ..status = chainStatusModel
-              ..travel = chainTravelModel
-              ..basicicons = chainBasicicons;
+            bars_model.BarsStatusCooldownsModel externalStatusModel =
+                bars_model.BarsStatusCooldownsModel()
+                  ..status = chainStatusModel
+                  ..travel = chainTravelModel
+                  ..basicicons = chainBasicicons;
 
-            _chainController.getOrSetStatus(externalStatusModel: externalStatusModel);
+            _chainController.getOrSetStatus(
+                externalStatusModel: externalStatusModel);
           }
 
-          if (apiResponse.faction?.factionId != null && apiResponse.faction!.factionId! > 0) {
+          if (apiResponse.faction?.factionId != null &&
+              apiResponse.faction!.factionId! > 0) {
             _u.factionId = apiResponse.faction!.factionId!;
           }
 
-          if (apiResponse.job?.companyId != null && apiResponse.job!.companyId! > 0) {
+          if (apiResponse.job?.companyId != null &&
+              apiResponse.job!.companyId! > 0) {
             _u.companyId = apiResponse.job!.companyId!;
           }
 
@@ -5966,7 +6357,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   }
 
   Future _getStatsChart() async {
-    Future<void> loadFromCacheOrError(String errorMsg, {bool forceShow = false}) async {
+    Future<void> loadFromCacheOrError(String errorMsg,
+        {bool forceShow = false}) async {
       final savedChart = await Prefs().getTornStatsChartSave();
       if (savedChart.isNotEmpty) {
         setState(() {
@@ -5988,7 +6380,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     try {
       if (!_settingsProvider!.tornStatsChartEnabled) return;
 
-      final DateTime lastFetched = DateTime.fromMillisecondsSinceEpoch(_settingsProvider!.tornStatsChartDateTime);
+      final DateTime lastFetched = DateTime.fromMillisecondsSinceEpoch(
+          _settingsProvider!.tornStatsChartDateTime);
 
       if (DateTime.now().difference(lastFetched).inHours < 26) {
         final savedChart = await Prefs().getTornStatsChartSave();
@@ -6002,11 +6395,17 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         }
       }
 
-      final String tornStatsURL = 'https://www.tornstats.com/api/v1/${_u.alternativeTornStatsKey}/battlestats/graph';
-      final resp = await http.get(Uri.parse(tornStatsURL)).timeout(const Duration(seconds: 5));
+      final String tornStatsURL =
+          'https://www.tornstats.com/api/v1/${_u.alternativeTornStatsKey}/battlestats/graph';
+      final resp = await http
+          .get(Uri.parse(tornStatsURL))
+          .timeout(const Duration(seconds: 5));
       if (resp.statusCode == 200) {
-        final StatsChartTornStats statsJson = statsChartTornStatsFromJson(resp.body);
-        if (statsJson.status == true && statsJson.data != null && statsJson.data!.isNotEmpty) {
+        final StatsChartTornStats statsJson =
+            statsChartTornStatsFromJson(resp.body);
+        if (statsJson.status == true &&
+            statsJson.data != null &&
+            statsJson.data!.isNotEmpty) {
           setState(() {
             _statsChartModel = statsJson;
             _statsChartIsCached = false;
@@ -6014,7 +6413,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           });
 
           Prefs().setTornStatsChartSave(resp.body);
-          _settingsProvider!.setTornStatsChartDateTime = DateTime.now().millisecondsSinceEpoch;
+          _settingsProvider!.setTornStatsChartDateTime =
+              DateTime.now().millisecondsSinceEpoch;
         } else {
           final errorMsg = formatTornStatsErrorMessage(statsJson.message);
           await loadFromCacheOrError(
@@ -6082,10 +6482,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       final dynamic apiResponse = await ApiCallsV1.getRankedWars();
       if (apiResponse is RankedWarsModel) {
         for (final warMap in apiResponse.rankedwars!.entries) {
-          if (warMap.value.factions!.keys.contains(_user!.faction!.factionId.toString())) {
+          if (warMap.value.factions!.keys
+              .contains(_user!.faction!.factionId.toString())) {
             final int ts = DateTime.now().millisecondsSinceEpoch;
             final bool warInFuture = warMap.value.war!.start! * 1000 > ts;
-            final bool warActive = warMap.value.war!.start! < ts && warMap.value.war!.end == 0;
+            final bool warActive =
+                warMap.value.war!.start! < ts && warMap.value.war!.end == 0;
             if (warInFuture || warActive) {
               setState(() {
                 _factionRankedWar = warMap.value;
@@ -6110,7 +6512,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
       final nextFetchTime = await Prefs().getJobAddictionNextCallTime();
 
-      final int currentTimeMillis = DateTime.now().toUtc().millisecondsSinceEpoch;
+      final int currentTimeMillis =
+          DateTime.now().toUtc().millisecondsSinceEpoch;
       final bool shouldCallApi = currentTimeMillis >= nextFetchTime;
 
       // If we should call the API, fetch the data and update SharedPreferences
@@ -6124,14 +6527,17 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
             // Calculate the next allowed API call time
             final DateTime now = DateTime.now().toUtc();
-            DateTime nextAllowedTime = DateTime.utc(now.year, now.month, now.day, 18, 30);
+            DateTime nextAllowedTime =
+                DateTime.utc(now.year, now.month, now.day, 18, 30);
             if (now.isAfter(nextAllowedTime)) {
               nextAllowedTime = nextAllowedTime.add(const Duration(days: 1));
             }
-            final int nextAllowedTimeMillis = nextAllowedTime.millisecondsSinceEpoch;
+            final int nextAllowedTimeMillis =
+                nextAllowedTime.millisecondsSinceEpoch;
 
             Prefs().setJobAddictionNextCallTime(nextAllowedTimeMillis);
-            Prefs().setJobAdditionValue(eMap.value.effectiveness!.addiction ?? 0);
+            Prefs()
+                .setJobAdditionValue(eMap.value.effectiveness!.addiction ?? 0);
             setState(() {
               _companyAddiction = eMap.value.effectiveness!.addiction ?? 0;
             });
@@ -6162,7 +6568,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       }
 
       // Calculate time difference from last time we obtained events
-      final DateTime lastEventsTs = DateTime.fromMillisecondsSinceEpoch(await Prefs().getEventsLastRetrieved());
+      final DateTime lastEventsTs = DateTime.fromMillisecondsSinceEpoch(
+          await Prefs().getEventsLastRetrieved());
       int minutesDiff = DateTime.now().difference(lastEventsTs).inMinutes;
 
       // ### DEBUG ###
@@ -6182,13 +6589,15 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         int? lastTs = eventsSave[0].timestamp;
 
         // Get new events after that and add them
-        final dynamic newEventsResponse = await ApiCallsV1.getEvents(limit: 100, from: lastTs);
+        final dynamic newEventsResponse =
+            await ApiCallsV1.getEvents(limit: 100, from: lastTs);
         if (newEventsResponse is List<Event>) {
           if (newEventsResponse.isNotEmpty) {
             for (int i = 0; i < newEventsResponse.length; i++) {
               bool repeated = false;
               for (final Event inSave in eventsSave) {
-                if (newEventsResponse[i].event == inSave.event && newEventsResponse[i].timestamp == inSave.timestamp) {
+                if (newEventsResponse[i].event == inSave.event &&
+                    newEventsResponse[i].timestamp == inSave.timestamp) {
                   repeated = true;
                   break;
                 }
@@ -6222,8 +6631,13 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       // If more than 30 minutes elapsed, we get the whole pack
       // Calculate one month ago
       log("Events save elapse more than 30 minutes, getting all events");
-      final int monthAgo = ((DateTime.now().subtract(const Duration(days: 30)).millisecondsSinceEpoch) / 1000).ceil();
-      final dynamic allEventsResponse = await ApiCallsV1.getEvents(limit: 100, from: monthAgo);
+      final int monthAgo = ((DateTime.now()
+                  .subtract(const Duration(days: 30))
+                  .millisecondsSinceEpoch) /
+              1000)
+          .ceil();
+      final dynamic allEventsResponse =
+          await ApiCallsV1.getEvents(limit: 100, from: monthAgo);
       if (allEventsResponse is List<Event>) {
         // Save events and last retrieved timestamp
         List<String> eventsListToSave = [];
@@ -6249,8 +6663,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       }
     } catch (e, trace) {
       logToUser("PDA Error at Profile Events: $e, $trace");
-      if (!Platform.isWindows) FirebaseCrashlytics.instance.log("PDA Crash at Profile Events");
-      if (!Platform.isWindows) FirebaseCrashlytics.instance.recordError("PDA Error: $e", trace);
+      if (!Platform.isWindows)
+        FirebaseCrashlytics.instance.log("PDA Crash at Profile Events");
+      if (!Platform.isWindows)
+        FirebaseCrashlytics.instance.recordError("PDA Error: $e", trace);
     }
   }
 
@@ -6260,7 +6676,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
     try {
       if (_user == null) return;
-      final factionCrimes = await ApiCallsV1.getFactionCrimes(playerId: _user!.playerId.toString());
+      final factionCrimes = await ApiCallsV1.getFactionCrimes(
+          playerId: _user!.playerId.toString());
 
       // OPTION 1 - Check if we have faction access
       if (factionCrimes != null && factionCrimes is FactionCrimesModel) {
@@ -6281,12 +6698,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
               if (participant.containsKey(UserHelper.playerId.toString())) {
                 complexString = crime.crimeName;
-                complexTime = DateTime.fromMillisecondsSinceEpoch(crime.timeReady! * 1000);
+                complexTime = DateTime.fromMillisecondsSinceEpoch(
+                    crime.timeReady! * 1000);
               }
             }
 
             // If found our crime, assign final number of participants not ready
-            if (complexString!.isNotEmpty) _ocComplexPeopleNotReady = participantsNotReady;
+            if (complexString!.isNotEmpty)
+              _ocComplexPeopleNotReady = participantsNotReady;
           }
         });
 
@@ -6309,7 +6728,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             } else if (_ocComplexPeopleNotReady == 1) {
               complexTimeString = "OC is ready, but 1 participant is not!";
             } else {
-              complexTimeString = "OC is ready, but $_ocComplexPeopleNotReady participants are not!";
+              complexTimeString =
+                  "OC is ready, but $_ocComplexPeopleNotReady participants are not!";
             }
           }
 
@@ -6327,7 +6747,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       }
 
       // OPTION 2 - Could indicate that we have no AA access, so we are looking for events!
-      if (factionCrimes == null || factionCrimes is ApiError || _ocFinalStringLong.isEmpty) {
+      if (factionCrimes == null ||
+          factionCrimes is ApiError ||
+          _ocFinalStringLong.isEmpty) {
         bool simpleExists = false;
         DateTime simpleTime = DateTime.now();
         String simpleString = "";
@@ -6358,7 +6780,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         for (final Event e in _events) {
           if (!foundExpired && !foundProgress && !error) {
             if (e.event!.contains("You and your team") ||
-                (e.event!.contains("canceled the") && e.event!.contains("that you were selected for"))) {
+                (e.event!.contains("canceled the") &&
+                    e.event!.contains("that you were selected for"))) {
               foundExpired = true;
             } else if (e.event!.contains("You have been selected")) {
               final RegExp strRaw = RegExp("([0-9]+) hours");
@@ -6368,10 +6791,13 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                   final hoursString = match.group(1)!;
                   try {
                     final hours = int.parse(hoursString);
-                    simpleTime = DateTime.fromMillisecondsSinceEpoch(e.timestamp! * 1000).add(Duration(hours: hours));
+                    simpleTime =
+                        DateTime.fromMillisecondsSinceEpoch(e.timestamp! * 1000)
+                            .add(Duration(hours: hours));
                     foundProgress = true;
                     simpleExists = true;
-                    _settingsProvider!.changeOCrimeLastKnown = simpleTime.millisecondsSinceEpoch;
+                    _settingsProvider!.changeOCrimeLastKnown =
+                        simpleTime.millisecondsSinceEpoch;
                     calculateSimpleReadiness();
                   } catch (e) {
                     foundExpired = false;
@@ -6388,7 +6814,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         // ahead of the last known planned OC crime time, perhaps we run out of events (some OC
         // take place after 8 days). If that's the case, show that one anyway.
         if (!foundProgress && !foundExpired && !error) {
-          final lastKnown = DateTime.fromMillisecondsSinceEpoch(_settingsProvider!.oCrimeLastKnown);
+          final lastKnown = DateTime.fromMillisecondsSinceEpoch(
+              _settingsProvider!.oCrimeLastKnown);
           if (DateTime.now().isBefore(lastKnown)) {
             simpleExists = true;
             simpleTime = lastKnown;
@@ -6399,7 +6826,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
         // Check if we were disregarding this crime before (in which case we don't show it)
         if (foundProgress) {
-          if (_settingsProvider!.oCrimeDisregarded == simpleTime.millisecondsSinceEpoch) {
+          if (_settingsProvider!.oCrimeDisregarded ==
+              simpleTime.millisecondsSinceEpoch) {
             simpleExists = false;
             _ocSimpleStringFinal = "";
           }
@@ -6437,8 +6865,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   SpeedDial buildSpeedDial() {
     return SpeedDial(
       animationDuration: const Duration(),
-      direction:
-          MediaQuery.orientationOf(context) == Orientation.portrait ? SpeedDialDirection.up : SpeedDialDirection.left,
+      direction: MediaQuery.orientationOf(context) == Orientation.portrait
+          ? SpeedDialDirection.up
+          : SpeedDialDirection.left,
       backgroundColor: Colors.transparent,
       overlayColor: Colors.transparent,
       curve: Curves.bounceIn,
@@ -6448,11 +6877,13 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           onTap: () async {
             // Trying to get rid of errors switching to the browser
             await Future.delayed(const Duration(milliseconds: 200));
-            _launchBrowser(url: 'https://www.torn.com/city.php', shortTap: true);
+            _launchBrowser(
+                url: 'https://www.torn.com/city.php', shortTap: true);
           },
           onLongPress: () async {
             await Future.delayed(const Duration(milliseconds: 200));
-            _launchBrowser(url: 'https://www.torn.com/city.php', shortTap: false);
+            _launchBrowser(
+                url: 'https://www.torn.com/city.php', shortTap: false);
           },
           child: Container(
             width: 100,
@@ -6474,11 +6905,13 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         SpeedDialChild(
           onTap: () async {
             await Future.delayed(const Duration(milliseconds: 200));
-            _launchBrowser(url: 'https://www.torn.com/trade.php', shortTap: true);
+            _launchBrowser(
+                url: 'https://www.torn.com/trade.php', shortTap: true);
           },
           onLongPress: () async {
             await Future.delayed(const Duration(milliseconds: 200));
-            _launchBrowser(url: 'https://www.torn.com/trade.php', shortTap: false);
+            _launchBrowser(
+                url: 'https://www.torn.com/trade.php', shortTap: false);
           },
           child: Container(
             width: 100,
@@ -6500,11 +6933,13 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         SpeedDialChild(
           onTap: () async {
             await Future.delayed(const Duration(milliseconds: 200));
-            _launchBrowser(url: 'https://www.torn.com/item.php', shortTap: true);
+            _launchBrowser(
+                url: 'https://www.torn.com/item.php', shortTap: true);
           },
           onLongPress: () async {
             await Future.delayed(const Duration(milliseconds: 200));
-            _launchBrowser(url: 'https://www.torn.com/item.php', shortTap: false);
+            _launchBrowser(
+                url: 'https://www.torn.com/item.php', shortTap: false);
           },
           child: Container(
             width: 100,
@@ -6526,11 +6961,15 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         SpeedDialChild(
           onTap: () async {
             await Future.delayed(const Duration(milliseconds: 200));
-            _launchBrowser(url: 'https://www.torn.com/crimes.php#/step=main', shortTap: true);
+            _launchBrowser(
+                url: 'https://www.torn.com/crimes.php#/step=main',
+                shortTap: true);
           },
           onLongPress: () async {
             await Future.delayed(const Duration(milliseconds: 200));
-            _launchBrowser(url: 'https://www.torn.com/crimes.php#/step=main', shortTap: false);
+            _launchBrowser(
+                url: 'https://www.torn.com/crimes.php#/step=main',
+                shortTap: false);
           },
           child: Container(
             width: 100,
@@ -6560,7 +6999,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           },
           onLongPress: () async {
             await Future.delayed(const Duration(milliseconds: 200));
-            _launchBrowser(url: 'https://www.torn.com/gym.php', shortTap: false);
+            _launchBrowser(
+                url: 'https://www.torn.com/gym.php', shortTap: false);
           },
           child: Container(
             width: 100,
@@ -6624,7 +7064,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     );
   }
 
-  Future<void> _launchBrowser({required String? url, required bool? shortTap, bool recallLastSession = false}) async {
+  Future<void> _launchBrowser(
+      {required String? url,
+      required bool? shortTap,
+      bool recallLastSession = false}) async {
     if (url == null || shortTap == null) return;
 
     _webViewProvider.openBrowserPreference(
@@ -6649,7 +7092,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _scheduleNotification(ProfileNotification profileNotification) async {
+  Future<void> _scheduleNotification(
+      ProfileNotification profileNotification) async {
     int? secondsToNotification;
     late String channelTitle;
     String? channelSubtitle;
@@ -6666,37 +7110,52 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     switch (profileNotification) {
       case ProfileNotification.travel:
         notificationId = 201;
-        secondsToNotification = _travelArrivalTime.difference(DateTime.now()).inSeconds - _travelNotificationAhead;
+        secondsToNotification =
+            _travelArrivalTime.difference(DateTime.now()).inSeconds -
+                _travelNotificationAhead;
         channelTitle = 'Manual travel';
         channelSubtitle = 'Manual travel';
         channelDescription = 'Manual notifications for travel';
-        notificationTitle = _settingsProvider!.discreetNotifications ? "T" : await Prefs().getTravelNotificationTitle();
-        notificationSubtitle =
-            _settingsProvider!.discreetNotifications ? " " : await Prefs().getTravelNotificationBody();
+        notificationTitle = _settingsProvider!.discreetNotifications
+            ? "T"
+            : await Prefs().getTravelNotificationTitle();
+        notificationSubtitle = _settingsProvider!.discreetNotifications
+            ? " "
+            : await Prefs().getTravelNotificationBody();
         notificationPayload += 'travel';
         notificationIconAndroid = "notification_travel";
         notificationIconColor = Colors.blue;
       case ProfileNotification.energy:
         notificationId = 101;
-        secondsToNotification = _energyNotificationTime!.difference(DateTime.now()).inSeconds;
+        secondsToNotification =
+            _energyNotificationTime!.difference(DateTime.now()).inSeconds;
         channelTitle = 'Manual energy';
         channelSubtitle = 'Manual energy';
         channelDescription = 'Manual notifications for energy';
-        notificationTitle = _settingsProvider!.discreetNotifications ? "E" : 'Energy bar';
-        notificationSubtitle = _settingsProvider!.discreetNotifications ? "Full" : 'Here is your energy reminder!';
-        final myTimeStamp = (_energyNotificationTime!.millisecondsSinceEpoch / 1000).floor();
+        notificationTitle =
+            _settingsProvider!.discreetNotifications ? "E" : 'Energy bar';
+        notificationSubtitle = _settingsProvider!.discreetNotifications
+            ? "Full"
+            : 'Here is your energy reminder!';
+        final myTimeStamp =
+            (_energyNotificationTime!.millisecondsSinceEpoch / 1000).floor();
         notificationPayload += '${profileNotification.string}-$myTimeStamp';
         notificationIconAndroid = "notification_energy";
         notificationIconColor = Colors.green;
       case ProfileNotification.nerve:
         notificationId = 102;
-        secondsToNotification = _nerveNotificationTime!.difference(DateTime.now()).inSeconds;
+        secondsToNotification =
+            _nerveNotificationTime!.difference(DateTime.now()).inSeconds;
         channelTitle = 'Manual nerve';
         channelSubtitle = 'Manual nerve';
         channelDescription = 'Manual notifications for nerve';
-        notificationTitle = _settingsProvider!.discreetNotifications ? "N" : 'Nerve bar';
-        notificationSubtitle = _settingsProvider!.discreetNotifications ? "Full" : 'Here is your nerve reminder!';
-        final myTimeStamp = (_nerveNotificationTime!.millisecondsSinceEpoch / 1000).floor();
+        notificationTitle =
+            _settingsProvider!.discreetNotifications ? "N" : 'Nerve bar';
+        notificationSubtitle = _settingsProvider!.discreetNotifications
+            ? "Full"
+            : 'Here is your nerve reminder!';
+        final myTimeStamp =
+            (_nerveNotificationTime!.millisecondsSinceEpoch / 1000).floor();
         notificationPayload += '${profileNotification.string}-$myTimeStamp';
         notificationIconAndroid = "notification_nerve";
         notificationIconColor = Colors.red;
@@ -6706,9 +7165,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         channelTitle = 'Manual life';
         channelSubtitle = 'Manual life';
         channelDescription = 'Manual notifications for life';
-        notificationTitle = _settingsProvider!.discreetNotifications ? "Lf" : 'Life bar';
-        notificationSubtitle = _settingsProvider!.discreetNotifications ? "Full" : 'Here is your life reminder!';
-        final myTimeStamp = (DateTime.now().millisecondsSinceEpoch / 1000).floor() + _user!.life!.fulltime!;
+        notificationTitle =
+            _settingsProvider!.discreetNotifications ? "Lf" : 'Life bar';
+        notificationSubtitle = _settingsProvider!.discreetNotifications
+            ? "Full"
+            : 'Here is your life reminder!';
+        final myTimeStamp =
+            (DateTime.now().millisecondsSinceEpoch / 1000).floor() +
+                _user!.life!.fulltime!;
         notificationPayload += '${profileNotification.string}-$myTimeStamp';
         notificationIconAndroid = "notification_life";
         notificationIconColor = Colors.red;
@@ -6718,10 +7182,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         channelTitle = 'Manual drugs';
         channelSubtitle = 'Manual drugs';
         channelDescription = 'Manual notifications for drugs';
-        notificationTitle = _settingsProvider!.discreetNotifications ? "D" : 'Drug Cooldown';
-        notificationSubtitle =
-            _settingsProvider!.discreetNotifications ? "Exp" : 'Here is your drugs cooldown reminder!';
-        final myTimeStamp = (DateTime.now().millisecondsSinceEpoch / 1000).floor() + _user!.cooldowns!.drug!;
+        notificationTitle =
+            _settingsProvider!.discreetNotifications ? "D" : 'Drug Cooldown';
+        notificationSubtitle = _settingsProvider!.discreetNotifications
+            ? "Exp"
+            : 'Here is your drugs cooldown reminder!';
+        final myTimeStamp =
+            (DateTime.now().millisecondsSinceEpoch / 1000).floor() +
+                _user!.cooldowns!.drug!;
         notificationPayload += '${profileNotification.string}-$myTimeStamp';
         notificationIconAndroid = "notification_drugs";
         notificationIconColor = Colors.green;
@@ -6731,10 +7199,15 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         channelTitle = 'Manual medical';
         channelSubtitle = 'Manual medical';
         channelDescription = 'Manual notifications for medical';
-        notificationTitle = _settingsProvider!.discreetNotifications ? "Med" : 'Medical Cooldown';
-        notificationSubtitle =
-            _settingsProvider!.discreetNotifications ? "Exp" : 'Here is your medical cooldown reminder!';
-        final myTimeStamp = (DateTime.now().millisecondsSinceEpoch / 1000).floor() + _user!.cooldowns!.medical!;
+        notificationTitle = _settingsProvider!.discreetNotifications
+            ? "Med"
+            : 'Medical Cooldown';
+        notificationSubtitle = _settingsProvider!.discreetNotifications
+            ? "Exp"
+            : 'Here is your medical cooldown reminder!';
+        final myTimeStamp =
+            (DateTime.now().millisecondsSinceEpoch / 1000).floor() +
+                _user!.cooldowns!.medical!;
         notificationPayload += '${profileNotification.string}-$myTimeStamp';
         notificationIconAndroid = "notification_medical";
         notificationIconColor = Colors.yellow;
@@ -6744,64 +7217,89 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         channelTitle = 'Manual booster';
         channelSubtitle = 'Manual booster';
         channelDescription = 'Manual notifications for booster';
-        notificationTitle = _settingsProvider!.discreetNotifications ? "B" : 'Booster Cooldown';
-        notificationSubtitle =
-            _settingsProvider!.discreetNotifications ? "Exp" : 'Here is your booster cooldown reminder!';
-        final myTimeStamp = (DateTime.now().millisecondsSinceEpoch / 1000).floor() + _user!.cooldowns!.booster!;
+        notificationTitle =
+            _settingsProvider!.discreetNotifications ? "B" : 'Booster Cooldown';
+        notificationSubtitle = _settingsProvider!.discreetNotifications
+            ? "Exp"
+            : 'Here is your booster cooldown reminder!';
+        final myTimeStamp =
+            (DateTime.now().millisecondsSinceEpoch / 1000).floor() +
+                _user!.cooldowns!.booster!;
         notificationPayload += '${profileNotification.string}-$myTimeStamp';
         notificationIconAndroid = "notification_booster";
         notificationIconColor = Colors.orange;
       case ProfileNotification.hospital:
         notificationId = 107;
-        secondsToNotification = _hospitalReleaseTime.difference(DateTime.now()).inSeconds - _hospitalNotificationAhead;
+        secondsToNotification =
+            _hospitalReleaseTime.difference(DateTime.now()).inSeconds -
+                _hospitalNotificationAhead;
         channelTitle = 'Manual hospital';
         channelSubtitle = 'Manual hospital';
         channelDescription = 'Manual notifications for hospital';
-        notificationTitle = _settingsProvider!.discreetNotifications ? "H" : 'Hospital release';
-        notificationSubtitle =
-            _settingsProvider!.discreetNotifications ? "App" : 'You are about to be released from hospital!';
+        notificationTitle =
+            _settingsProvider!.discreetNotifications ? "H" : 'Hospital release';
+        notificationSubtitle = _settingsProvider!.discreetNotifications
+            ? "App"
+            : 'You are about to be released from hospital!';
         notificationPayload += 'hospital';
         notificationIconAndroid = "notification_hospital";
         notificationIconColor = Colors.yellow;
       case ProfileNotification.jail:
         notificationId = 108;
-        secondsToNotification = _jailReleaseTime.difference(DateTime.now()).inSeconds - _jailNotificationAhead;
+        secondsToNotification =
+            _jailReleaseTime.difference(DateTime.now()).inSeconds -
+                _jailNotificationAhead;
         channelTitle = 'Manual jail';
         channelSubtitle = 'Manual jail';
         channelDescription = 'Manual notifications for jail';
-        notificationTitle = _settingsProvider!.discreetNotifications ? "J" : 'Jail release';
-        notificationSubtitle =
-            _settingsProvider!.discreetNotifications ? "App" : 'You are about to be released from jail!';
+        notificationTitle =
+            _settingsProvider!.discreetNotifications ? "J" : 'Jail release';
+        notificationSubtitle = _settingsProvider!.discreetNotifications
+            ? "App"
+            : 'You are about to be released from jail!';
         notificationPayload += 'jail';
         notificationIconAndroid = "notification_events";
         notificationIconColor = Colors.purple;
       case ProfileNotification.rankedWar:
         notificationId = 109;
-        secondsToNotification = _rankedWarTime.difference(DateTime.now()).inSeconds - _rankedWarNotificationAhead;
+        secondsToNotification =
+            _rankedWarTime.difference(DateTime.now()).inSeconds -
+                _rankedWarNotificationAhead;
         channelTitle = 'Manual war';
         channelSubtitle = 'Manual war';
         channelDescription = 'Manual notifications for war';
-        notificationTitle = _settingsProvider!.discreetNotifications ? "W" : 'Ranked War';
-        notificationSubtitle = _settingsProvider!.discreetNotifications ? "App" : 'Ranked war is about to start!';
+        notificationTitle =
+            _settingsProvider!.discreetNotifications ? "W" : 'Ranked War';
+        notificationSubtitle = _settingsProvider!.discreetNotifications
+            ? "App"
+            : 'Ranked war is about to start!';
         notificationPayload += 'war';
         notificationIconAndroid = "notification_assists";
         notificationIconColor = Colors.red;
       case ProfileNotification.raceStart:
         notificationId = 110;
-        secondsToNotification = _raceStartTime.difference(DateTime.now()).inSeconds - _raceStartNotificationAhead;
+        secondsToNotification =
+            _raceStartTime.difference(DateTime.now()).inSeconds -
+                _raceStartNotificationAhead;
         channelTitle = 'Manual race start';
         channelSubtitle = 'Manual race start';
         channelDescription = 'Manual notifications for race start';
-        notificationTitle = _settingsProvider!.discreetNotifications ? "R" : 'Race Start';
-        notificationSubtitle = _settingsProvider!.discreetNotifications ? "Start" : 'Lights out and here we go!';
+        notificationTitle =
+            _settingsProvider!.discreetNotifications ? "R" : 'Race Start';
+        notificationSubtitle = _settingsProvider!.discreetNotifications
+            ? "Start"
+            : 'Lights out and here we go!';
         notificationPayload += 'raceStart';
         notificationIconAndroid = "notification_racing";
         notificationIconColor = Colors.blue;
       case ProfileNotification.education:
         notificationId = 113;
         if (_educationNotificationTime != null) {
-          secondsToNotification = _educationNotificationTime!.difference(DateTime.now()).inSeconds;
-          final myTimeStamp = (_educationNotificationTime!.millisecondsSinceEpoch / 1000).floor();
+          secondsToNotification =
+              _educationNotificationTime!.difference(DateTime.now()).inSeconds;
+          final myTimeStamp =
+              (_educationNotificationTime!.millisecondsSinceEpoch / 1000)
+                  .floor();
           notificationPayload += '${profileNotification.string}-$myTimeStamp';
         } else {
           secondsToNotification = 0;
@@ -6809,9 +7307,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         channelTitle = 'Manual education';
         channelSubtitle = 'Manual education';
         channelDescription = 'Manual notifications for education';
-        notificationTitle = _settingsProvider!.discreetNotifications ? "Edu" : 'Education Complete';
-        notificationSubtitle =
-            _settingsProvider!.discreetNotifications ? "Done" : 'Your education course has finished!';
+        notificationTitle = _settingsProvider!.discreetNotifications
+            ? "Edu"
+            : 'Education Complete';
+        notificationSubtitle = _settingsProvider!.discreetNotifications
+            ? "Done"
+            : 'Your education course has finished!';
         notificationIconAndroid = "notification_items";
         notificationIconColor = Colors.blueGrey;
     }
@@ -6840,11 +7341,11 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       ledOffMs: 500,
     );
 
-    var iOSPlatformChannelSpecifics =
-        const DarwinNotificationDetails(presentSound: true, sound: 'slow_spring_board.aiff');
+    var iOSPlatformChannelSpecifics = const DarwinNotificationDetails(
+        presentSound: true, sound: 'slow_spring_board.aiff');
     if (notificationId == 201) {
-      iOSPlatformChannelSpecifics =
-          const DarwinNotificationDetails(presentSound: true, sound: 'aircraft_seatbelt.aiff');
+      iOSPlatformChannelSpecifics = const DarwinNotificationDetails(
+          presentSound: true, sound: 'aircraft_seatbelt.aiff');
     }
 
     final platformChannelSpecifics = NotificationDetails(
@@ -6861,11 +7362,13 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       notificationTitle,
       notificationSubtitle,
       //tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10)), // DEBUG
-      tz.TZDateTime.now(tz.local).add(Duration(seconds: secondsToNotification!)),
+      tz.TZDateTime.now(tz.local)
+          .add(Duration(seconds: secondsToNotification!)),
       platformChannelSpecifics,
       payload: notificationPayload,
       androidScheduleMode: exactAlarmsPermissionAndroid
-          ? AndroidScheduleMode.exactAllowWhileIdle // Deliver at exact time (needs permission)
+          ? AndroidScheduleMode
+              .exactAllowWhileIdle // Deliver at exact time (needs permission)
           : AndroidScheduleMode.inexactAllowWhileIdle,
     );
 
@@ -6890,7 +7393,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     bool raceStart = false;
     bool education = false;
 
-    final pendingNotificationRequests = await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+    final pendingNotificationRequests =
+        await flutterLocalNotificationsPlugin.pendingNotificationRequests();
 
     if (pendingNotificationRequests.isNotEmpty) {
       for (final notification in pendingNotificationRequests) {
@@ -6953,7 +7457,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     await _refreshActiveAlarmKitIds();
   }
 
-  Future<void> _cancelNotifications(ProfileNotification profileNotification) async {
+  Future<void> _cancelNotifications(
+      ProfileNotification profileNotification) async {
     switch (profileNotification) {
       case ProfileNotification.travel:
         await flutterLocalNotificationsPlugin.cancel(201);
@@ -6985,7 +7490,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   }
 
   Future<void> _checkIfNotificationsAreCurrent() async {
-    final pendingNotificationRequests = await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+    final pendingNotificationRequests =
+        await flutterLocalNotificationsPlugin.pendingNotificationRequests();
 
     if (pendingNotificationRequests.isEmpty) {
       return;
@@ -7021,7 +7527,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       if (notification.payload!.contains('energy')) {
         final customTriggerRoundedUp = _customEnergyTrigger! + 4;
         if (_user!.energy!.current! >= _user!.energy!.maximum! ||
-            (!_customEnergyMaxOverride && _user!.energy!.current! > customTriggerRoundedUp)) {
+            (!_customEnergyMaxOverride &&
+                _user!.energy!.current! > customTriggerRoundedUp)) {
           _cancelNotifications(ProfileNotification.energy);
           BotToast.showText(
             text: 'Energy notification expired, removing!',
@@ -7036,16 +7543,21 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           continue;
         }
         // If override and still below it, we compare with full
-        if (_customEnergyMaxOverride && _customEnergyTrigger! < _user!.energy!.current!) {
-          final newCalculation =
-              DateTime.now().add(Duration(seconds: _user!.energy!.fulltime!)).millisecondsSinceEpoch / 1000;
-          final compareTimeStamps = (newCalculation - oldTimeStamp).abs().floor();
+        if (_customEnergyMaxOverride &&
+            _customEnergyTrigger! < _user!.energy!.current!) {
+          final newCalculation = DateTime.now()
+                  .add(Duration(seconds: _user!.energy!.fulltime!))
+                  .millisecondsSinceEpoch /
+              1000;
+          final compareTimeStamps =
+              (newCalculation - oldTimeStamp).abs().floor();
           if (compareTimeStamps > 120) {
             _cancelNotifications(ProfileNotification.energy);
             _scheduleNotification(ProfileNotification.energy);
             triggered = true;
             updatedTypes.add('energy');
-            final energyCurrentSchedule = DateTime.now().add(Duration(seconds: _user!.energy!.fulltime!));
+            final energyCurrentSchedule =
+                DateTime.now().add(Duration(seconds: _user!.energy!.fulltime!));
             updatedTimes.add(formatter.format(energyCurrentSchedule));
           }
         }
@@ -7058,30 +7570,40 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             final energyToGo = _customEnergyTrigger! - _user!.energy!.current!;
             final energyTicksToGo = energyToGo / _user!.energy!.increment!;
             if (energyTicksToGo > 1) {
-              final consumedTick = _user!.energy!.interval! - _user!.energy!.ticktime!;
-              newSecondsToGo = (energyTicksToGo * _user!.energy!.interval! - consumedTick).floor();
+              final consumedTick =
+                  _user!.energy!.interval! - _user!.energy!.ticktime!;
+              newSecondsToGo =
+                  (energyTicksToGo * _user!.energy!.interval! - consumedTick)
+                      .floor();
             } else if (energyTicksToGo > 0 && energyTicksToGo <= 1) {
               newSecondsToGo = _user!.energy!.ticktime;
             }
           }
 
-          final newCalculation = DateTime.now().add(Duration(seconds: newSecondsToGo!)).millisecondsSinceEpoch / 1000;
+          final newCalculation = DateTime.now()
+                  .add(Duration(seconds: newSecondsToGo!))
+                  .millisecondsSinceEpoch /
+              1000;
 
-          final compareTimeStamps = (newCalculation - oldTimeStamp).abs().floor();
+          final compareTimeStamps =
+              (newCalculation - oldTimeStamp).abs().floor();
           if (compareTimeStamps > 120) {
             _cancelNotifications(ProfileNotification.energy);
-            _energyNotificationTime = DateTime.now().add(Duration(seconds: newSecondsToGo));
+            _energyNotificationTime =
+                DateTime.now().add(Duration(seconds: newSecondsToGo));
             _scheduleNotification(ProfileNotification.energy);
             triggered = true;
             updatedTypes.add('energy');
-            final energyCurrentSchedule = DateTime.now().add(Duration(seconds: newSecondsToGo));
+            final energyCurrentSchedule =
+                DateTime.now().add(Duration(seconds: newSecondsToGo));
             updatedTimes.add(formatter.format(energyCurrentSchedule));
           }
         }
         // NERVE
       } else if (notification.payload!.contains('nerve')) {
         if (_user!.nerve!.current! >= _user!.nerve!.maximum! ||
-            (!_customNerveMaxOverride && _user!.nerve!.current! > _customNerveTrigger!)) {
+            (!_customNerveMaxOverride &&
+                _user!.nerve!.current! > _customNerveTrigger!)) {
           _cancelNotifications(ProfileNotification.nerve);
           BotToast.showText(
             text: 'Nerve notification expired, removing!',
@@ -7096,16 +7618,21 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           continue;
         }
         // If override and still below it, we compare with full
-        if (_customNerveMaxOverride && _customNerveTrigger! < _user!.nerve!.current!) {
-          final newCalculation =
-              DateTime.now().add(Duration(seconds: _user!.nerve!.fulltime!)).millisecondsSinceEpoch / 1000;
-          final compareTimeStamps = (newCalculation - oldTimeStamp).abs().floor();
+        if (_customNerveMaxOverride &&
+            _customNerveTrigger! < _user!.nerve!.current!) {
+          final newCalculation = DateTime.now()
+                  .add(Duration(seconds: _user!.nerve!.fulltime!))
+                  .millisecondsSinceEpoch /
+              1000;
+          final compareTimeStamps =
+              (newCalculation - oldTimeStamp).abs().floor();
           if (compareTimeStamps > 120) {
             _cancelNotifications(ProfileNotification.nerve);
             _scheduleNotification(ProfileNotification.nerve);
             triggered = true;
             updatedTypes.add('nerve');
-            final nerveCurrentSchedule = DateTime.now().add(Duration(seconds: _user!.nerve!.fulltime!));
+            final nerveCurrentSchedule =
+                DateTime.now().add(Duration(seconds: _user!.nerve!.fulltime!));
             updatedTimes.add(formatter.format(nerveCurrentSchedule));
           }
         }
@@ -7118,76 +7645,97 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             final nerveToGo = _customNerveTrigger! - _user!.nerve!.current!;
             final nerveTicksToGo = nerveToGo / _user!.nerve!.increment!;
             if (nerveTicksToGo > 1) {
-              final consumedTick = _user!.nerve!.interval! - _user!.nerve!.ticktime!;
-              newSecondsToGo = (nerveTicksToGo * _user!.nerve!.interval! - consumedTick).floor();
+              final consumedTick =
+                  _user!.nerve!.interval! - _user!.nerve!.ticktime!;
+              newSecondsToGo =
+                  (nerveTicksToGo * _user!.nerve!.interval! - consumedTick)
+                      .floor();
             } else if (nerveTicksToGo > 0 && nerveTicksToGo <= 1) {
               newSecondsToGo = _user!.nerve!.ticktime;
             }
           }
 
-          final newCalculation = DateTime.now().add(Duration(seconds: newSecondsToGo!)).millisecondsSinceEpoch / 1000;
+          final newCalculation = DateTime.now()
+                  .add(Duration(seconds: newSecondsToGo!))
+                  .millisecondsSinceEpoch /
+              1000;
 
-          final compareTimeStamps = (newCalculation - oldTimeStamp).abs().floor();
+          final compareTimeStamps =
+              (newCalculation - oldTimeStamp).abs().floor();
           if (compareTimeStamps > 120) {
             _cancelNotifications(ProfileNotification.nerve);
-            _nerveNotificationTime = DateTime.now().add(Duration(seconds: newSecondsToGo));
+            _nerveNotificationTime =
+                DateTime.now().add(Duration(seconds: newSecondsToGo));
             _scheduleNotification(ProfileNotification.nerve);
             triggered = true;
             updatedTypes.add('nerve');
-            final nerveCurrentSchedule = DateTime.now().add(Duration(seconds: newSecondsToGo));
+            final nerveCurrentSchedule =
+                DateTime.now().add(Duration(seconds: newSecondsToGo));
             updatedTimes.add(formatter.format(nerveCurrentSchedule));
           }
         }
         // LIFE
       } else if (notification.payload!.contains('life')) {
-        final newCalculation =
-            DateTime.now().add(Duration(seconds: _user!.life!.fulltime!)).millisecondsSinceEpoch / 1000;
+        final newCalculation = DateTime.now()
+                .add(Duration(seconds: _user!.life!.fulltime!))
+                .millisecondsSinceEpoch /
+            1000;
         final compareTimeStamps = (newCalculation - oldTimeStamp).abs().floor();
         if (compareTimeStamps > 120) {
           _cancelNotifications(ProfileNotification.life);
           _scheduleNotification(ProfileNotification.life);
           triggered = true;
           updatedTypes.add('life');
-          final lifeCurrentSchedule = DateTime.now().add(Duration(seconds: _user!.life!.fulltime!));
+          final lifeCurrentSchedule =
+              DateTime.now().add(Duration(seconds: _user!.life!.fulltime!));
           updatedTimes.add(formatter.format(lifeCurrentSchedule));
         }
         // DRUGS
       } else if (notification.payload!.contains('drugs')) {
-        final newCalculation =
-            DateTime.now().add(Duration(seconds: _user!.cooldowns!.drug!)).millisecondsSinceEpoch / 1000;
+        final newCalculation = DateTime.now()
+                .add(Duration(seconds: _user!.cooldowns!.drug!))
+                .millisecondsSinceEpoch /
+            1000;
         final compareTimeStamps = (newCalculation - oldTimeStamp).abs().floor();
         if (compareTimeStamps > 120) {
           _cancelNotifications(ProfileNotification.drugs);
           _scheduleNotification(ProfileNotification.drugs);
           triggered = true;
           updatedTypes.add('drugs');
-          final drugsCurrentSchedule = DateTime.now().add(Duration(seconds: _user!.cooldowns!.drug!));
+          final drugsCurrentSchedule =
+              DateTime.now().add(Duration(seconds: _user!.cooldowns!.drug!));
           updatedTimes.add(formatter.format(drugsCurrentSchedule));
         }
         // MEDICAL
       } else if (notification.payload!.contains('medical')) {
-        final newCalculation =
-            DateTime.now().add(Duration(seconds: _user!.cooldowns!.medical!)).millisecondsSinceEpoch / 1000;
+        final newCalculation = DateTime.now()
+                .add(Duration(seconds: _user!.cooldowns!.medical!))
+                .millisecondsSinceEpoch /
+            1000;
         final compareTimeStamps = (newCalculation - oldTimeStamp).abs().floor();
         if (compareTimeStamps > 120) {
           _cancelNotifications(ProfileNotification.medical);
           _scheduleNotification(ProfileNotification.medical);
           triggered = true;
           updatedTypes.add('medical');
-          final medicalCurrentSchedule = DateTime.now().add(Duration(seconds: _user!.cooldowns!.medical!));
+          final medicalCurrentSchedule =
+              DateTime.now().add(Duration(seconds: _user!.cooldowns!.medical!));
           updatedTimes.add(formatter.format(medicalCurrentSchedule));
         }
         // BOOSTER
       } else if (notification.payload!.contains('booster')) {
-        final newCalculation =
-            DateTime.now().add(Duration(seconds: _user!.cooldowns!.booster!)).millisecondsSinceEpoch / 1000;
+        final newCalculation = DateTime.now()
+                .add(Duration(seconds: _user!.cooldowns!.booster!))
+                .millisecondsSinceEpoch /
+            1000;
         final compareTimeStamps = (newCalculation - oldTimeStamp).abs().floor();
         if (compareTimeStamps > 120) {
           _cancelNotifications(ProfileNotification.booster);
           _scheduleNotification(ProfileNotification.booster);
           triggered = true;
           updatedTypes.add('booster');
-          final boosterCurrentSchedule = DateTime.now().add(Duration(seconds: _user!.cooldowns!.booster!));
+          final boosterCurrentSchedule =
+              DateTime.now().add(Duration(seconds: _user!.cooldowns!.booster!));
           updatedTimes.add(formatter.format(boosterCurrentSchedule));
         }
       }
@@ -7254,16 +7802,21 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         return "No battle stats available";
       }
       var battleString = "\n\nBATTLE STATS";
-      battleString += '\nStrength: ${decimalFormat.format(_miscModel!.battleStats!.strength!.value)} '
+      battleString +=
+          '\nStrength: ${decimalFormat.format(_miscModel!.battleStats!.strength!.value)} '
           '(${decimalFormat.format(_miscModel!.battleStats!.strength!.value * 100 / _miscModel!.battleStats!.total!)}%)';
-      battleString += '\nDefense: ${decimalFormat.format(_miscModel!.battleStats!.defense!.value)} '
+      battleString +=
+          '\nDefense: ${decimalFormat.format(_miscModel!.battleStats!.defense!.value)} '
           '(${decimalFormat.format(_miscModel!.battleStats!.defense!.value * 100 / _miscModel!.battleStats!.total!)}%)';
-      battleString += '\nSpeed: ${decimalFormat.format(_miscModel!.battleStats!.speed!.value)} '
+      battleString +=
+          '\nSpeed: ${decimalFormat.format(_miscModel!.battleStats!.speed!.value)} '
           '(${decimalFormat.format(_miscModel!.battleStats!.speed!.value * 100 / _miscModel!.battleStats!.total!)}%)';
-      battleString += '\nDexterity: ${decimalFormat.format(_miscModel!.battleStats!.dexterity!.value)} '
+      battleString +=
+          '\nDexterity: ${decimalFormat.format(_miscModel!.battleStats!.dexterity!.value)} '
           '(${decimalFormat.format(_miscModel!.battleStats!.dexterity!.value * 100 / _miscModel!.battleStats!.total!)}%)';
       battleString += '\n-------';
-      battleString += '\nTotal: ${decimalFormat.format(_miscModel!.battleStats!.total)}';
+      battleString +=
+          '\nTotal: ${decimalFormat.format(_miscModel!.battleStats!.total)}';
       return battleString;
     }
 
@@ -7280,9 +7833,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
     String getWork() {
       var workString = "\n\nWORK STATS";
-      workString += '\nManual labor: ${decimalFormat.format(_miscModel!.workStats?.manualLabor)}';
-      workString += '\nIntelligence: ${decimalFormat.format(_miscModel!.workStats?.intelligence)}';
-      workString += '\nEndurance: ${decimalFormat.format(_miscModel!.workStats?.endurance)}';
+      workString +=
+          '\nManual labor: ${decimalFormat.format(_miscModel!.workStats?.manualLabor)}';
+      workString +=
+          '\nIntelligence: ${decimalFormat.format(_miscModel!.workStats?.intelligence)}';
+      workString +=
+          '\nEndurance: ${decimalFormat.format(_miscModel!.workStats?.endurance)}';
       return workString;
     }
 
@@ -7450,7 +8006,17 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
     int normalizeAlarmAheadForIOS(int value) {
       if (!Platform.isIOS) return value;
-      const allowedSeconds = <int>{20, 40, 60, 120, 300, 600, 1800, 3600, 21600};
+      const allowedSeconds = <int>{
+        20,
+        40,
+        60,
+        120,
+        300,
+        600,
+        1800,
+        3600,
+        21600
+      };
       if (allowedSeconds.contains(value)) return value;
 
       switch (value) {
@@ -7566,19 +8132,23 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
     final hospital = await Prefs().getHospitalNotificationType();
     _hospitalNotificationAhead = await Prefs().getHospitalNotificationAhead();
-    _hospitalAlarmAhead = normalizeAlarmAheadForIOS(await Prefs().getHospitalAlarmAhead());
+    _hospitalAlarmAhead =
+        normalizeAlarmAheadForIOS(await Prefs().getHospitalAlarmAhead());
     _hospitalTimerAhead = await Prefs().getHospitalTimerAhead();
 
     final jail = await Prefs().getJailNotificationType();
     _jailNotificationAhead = await Prefs().getJailNotificationAhead();
-    _jailAlarmAhead = normalizeAlarmAheadForIOS(await Prefs().getJailAlarmAhead());
+    _jailAlarmAhead =
+        normalizeAlarmAheadForIOS(await Prefs().getJailAlarmAhead());
     _jailTimerAhead = await Prefs().getJailTimerAhead();
 
     final rankedWar = await Prefs().getRankedWarNotificationType();
     _rankedWarNotificationAhead = await Prefs().getRankedWarNotificationAhead();
-    _rankedWarAlarmAhead = normalizeAlarmAheadForIOS(await Prefs().getRankedWarAlarmAhead());
+    _rankedWarAlarmAhead =
+        normalizeAlarmAheadForIOS(await Prefs().getRankedWarAlarmAhead());
     if (!Platform.isIOS && _rankedWarAlarmAhead == 0) {
-      _rankedWarAlarmAhead = 1; // Correction from legacy shared prefs on Android
+      _rankedWarAlarmAhead =
+          1; // Correction from legacy shared prefs on Android
     }
     _rankedWarTimerAhead = await Prefs().getRankedWarTimerAhead();
 
@@ -7850,13 +8420,15 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> _setAlarm(ProfileNotification profileNotification, String alarmSetString, bool percentageError) async {
+  Future<void> _setAlarm(ProfileNotification profileNotification,
+      String alarmSetString, bool percentageError) async {
     bool moreThan24Hours = false;
     int? hour;
     int? minute;
     String? message;
     DateTime? alarmDateTime;
-    final descriptor = AlarmKitServiceIos.profileDescriptor(profileNotification.string ?? '');
+    final descriptor =
+        AlarmKitServiceIos.profileDescriptor(profileNotification.string ?? '');
 
     DateTime currentTime = DateTime.now();
 
@@ -7865,7 +8437,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     switch (profileNotification) {
       case ProfileNotification.travel:
         final alarmTime = _travelArrivalTime.add(
-          Platform.isIOS ? Duration(seconds: -_travelAlarmAhead) : Duration(minutes: -_travelAlarmAhead),
+          Platform.isIOS
+              ? Duration(seconds: -_travelAlarmAhead)
+              : Duration(minutes: -_travelAlarmAhead),
         );
         hour = alarmTime.hour;
         minute = alarmTime.minute;
@@ -7917,7 +8491,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         moreThan24Hours = difference.inMinutes.abs() > 1439;
       case ProfileNotification.hospital:
         final alarmTime = _hospitalReleaseTime.add(
-          Platform.isIOS ? Duration(seconds: -_hospitalAlarmAhead) : Duration(minutes: -_hospitalAlarmAhead),
+          Platform.isIOS
+              ? Duration(seconds: -_hospitalAlarmAhead)
+              : Duration(minutes: -_hospitalAlarmAhead),
         );
         hour = alarmTime.hour;
         minute = alarmTime.minute;
@@ -7927,7 +8503,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         moreThan24Hours = difference.inMinutes.abs() > 1439;
       case ProfileNotification.jail:
         final alarmTime = _jailReleaseTime.add(
-          Platform.isIOS ? Duration(seconds: -_jailAlarmAhead) : Duration(minutes: -_jailAlarmAhead),
+          Platform.isIOS
+              ? Duration(seconds: -_jailAlarmAhead)
+              : Duration(minutes: -_jailAlarmAhead),
         );
         hour = alarmTime.hour;
         minute = alarmTime.minute;
@@ -7937,7 +8515,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         moreThan24Hours = difference.inMinutes.abs() > 1439;
       case ProfileNotification.rankedWar:
         final alarmTime = _rankedWarTime.add(
-          Platform.isIOS ? Duration(seconds: -_rankedWarAlarmAhead) : Duration(minutes: -_rankedWarAlarmAhead),
+          Platform.isIOS
+              ? Duration(seconds: -_rankedWarAlarmAhead)
+              : Duration(minutes: -_rankedWarAlarmAhead),
         );
         hour = alarmTime.hour;
         minute = alarmTime.minute;
@@ -7946,7 +8526,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         Duration difference = currentTime.difference(alarmTime);
         moreThan24Hours = difference.inMinutes.abs() > 1439;
       case ProfileNotification.raceStart:
-        final alarmTime = _raceStartTime.add(Duration(minutes: -_raceStartAlarmAhead));
+        final alarmTime =
+            _raceStartTime.add(Duration(minutes: -_raceStartAlarmAhead));
         hour = alarmTime.hour;
         minute = alarmTime.minute;
         message = isIOS ? 'Race Start' : 'Torn PDA Race Start';
@@ -7958,7 +8539,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           hour = _educationNotificationTime!.hour;
           minute = _educationNotificationTime!.minute;
           alarmDateTime = _educationNotificationTime;
-          Duration difference = currentTime.difference(_educationNotificationTime!);
+          Duration difference =
+              currentTime.difference(_educationNotificationTime!);
           moreThan24Hours = difference.inMinutes.abs() > 1439;
         } else {
           hour = currentTime.hour;
@@ -8026,8 +8608,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         fontSize: 14,
         color: Colors.white,
       ),
-      contentColor:
-          percentageError ? _themeProvider!.getTextColor(Colors.red) : _themeProvider!.getTextColor(Colors.green),
+      contentColor: percentageError
+          ? _themeProvider!.getTextColor(Colors.red)
+          : _themeProvider!.getTextColor(Colors.green),
       duration: const Duration(seconds: 5),
       contentPadding: const EdgeInsets.all(10),
     );
@@ -8072,7 +8655,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         'android.intent.extra.alarm.VIBRATE': alarmVibration,
         'android.intent.extra.alarm.RINGTONE': thisSound,
         'android.intent.extra.alarm.MESSAGE':
-            _settingsProvider!.discreetNotifications ? _getDiscreetAlarmMessage(profileNotification) : message,
+            _settingsProvider!.discreetNotifications
+                ? _getDiscreetAlarmMessage(profileNotification)
+                : message,
       },
     );
     intent.launch();
@@ -8098,40 +8683,54 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
     switch (profileNotification) {
       case ProfileNotification.travel:
-        totalSeconds = _travelArrivalTime.difference(DateTime.now()).inSeconds - _travelTimerAhead;
+        totalSeconds = _travelArrivalTime.difference(DateTime.now()).inSeconds -
+            _travelTimerAhead;
         message = 'Torn PDA Travel';
       case ProfileNotification.energy:
-        totalSeconds = _energyNotificationTime!.difference(DateTime.now()).inSeconds;
+        totalSeconds =
+            _energyNotificationTime!.difference(DateTime.now()).inSeconds;
         message = 'Torn PDA Energy';
       case ProfileNotification.nerve:
-        totalSeconds = _nerveNotificationTime!.difference(DateTime.now()).inSeconds;
+        totalSeconds =
+            _nerveNotificationTime!.difference(DateTime.now()).inSeconds;
         message = 'Torn PDA Nerve';
       case ProfileNotification.life:
-        totalSeconds = _lifeNotificationTime!.difference(DateTime.now()).inSeconds;
+        totalSeconds =
+            _lifeNotificationTime!.difference(DateTime.now()).inSeconds;
         message = 'Torn PDA Life';
       case ProfileNotification.drugs:
-        totalSeconds = _drugsNotificationTime!.difference(DateTime.now()).inSeconds;
+        totalSeconds =
+            _drugsNotificationTime!.difference(DateTime.now()).inSeconds;
         message = 'Torn PDA Drugs';
       case ProfileNotification.medical:
-        totalSeconds = _medicalNotificationTime!.difference(DateTime.now()).inSeconds;
+        totalSeconds =
+            _medicalNotificationTime!.difference(DateTime.now()).inSeconds;
         message = 'Torn PDA Medical';
       case ProfileNotification.booster:
-        totalSeconds = _boosterNotificationTime!.difference(DateTime.now()).inSeconds;
+        totalSeconds =
+            _boosterNotificationTime!.difference(DateTime.now()).inSeconds;
         message = 'Torn PDA Booster';
       case ProfileNotification.hospital:
-        totalSeconds = _hospitalReleaseTime.difference(DateTime.now()).inSeconds - _hospitalTimerAhead;
+        totalSeconds =
+            _hospitalReleaseTime.difference(DateTime.now()).inSeconds -
+                _hospitalTimerAhead;
         message = 'Torn PDA Hospital';
       case ProfileNotification.jail:
-        totalSeconds = _jailReleaseTime.difference(DateTime.now()).inSeconds - _jailTimerAhead;
+        totalSeconds = _jailReleaseTime.difference(DateTime.now()).inSeconds -
+            _jailTimerAhead;
         message = 'Torn PDA Jail';
       case ProfileNotification.rankedWar:
-        totalSeconds = _rankedWarTime.difference(DateTime.now()).inSeconds - _rankedWarTimerAhead;
+        totalSeconds = _rankedWarTime.difference(DateTime.now()).inSeconds -
+            _rankedWarTimerAhead;
         message = 'Torn PDA War';
       case ProfileNotification.raceStart:
-        totalSeconds = _raceStartTime.difference(DateTime.now()).inSeconds - _raceStartTimerAhead;
+        totalSeconds = _raceStartTime.difference(DateTime.now()).inSeconds -
+            _raceStartTimerAhead;
         message = 'Torn PDA Race Start';
       case ProfileNotification.education:
-        totalSeconds = _educationNotificationTime?.difference(DateTime.now()).inSeconds ?? 0;
+        totalSeconds =
+            _educationNotificationTime?.difference(DateTime.now()).inSeconds ??
+                0;
         message = 'Torn PDA Education';
     }
 
@@ -8141,7 +8740,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         'android.intent.extra.alarm.LENGTH': totalSeconds,
         'android.intent.extra.alarm.SKIP_UI': true,
         'android.intent.extra.alarm.MESSAGE':
-            _settingsProvider!.discreetNotifications ? _getDiscreetTimerMessage(profileNotification) : message,
+            _settingsProvider!.discreetNotifications
+                ? _getDiscreetTimerMessage(profileNotification)
+                : message,
       },
     );
     intent.launch();
@@ -8261,12 +8862,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                               ],
                             ),
                             onPressed: () async {
-                              const url = "https://www.torn.com/properties.php#/p=options&tab=vault";
+                              const url =
+                                  "https://www.torn.com/properties.php#/p=options&tab=vault";
                               Navigator.of(context).pop();
                               _launchBrowser(url: url, shortTap: true);
                             },
                             onLongPress: () async {
-                              const url = "https://www.torn.com/properties.php#/p=options&tab=vault";
+                              const url =
+                                  "https://www.torn.com/properties.php#/p=options&tab=vault";
                               Navigator.of(context).pop();
                               _launchBrowser(url: url, shortTap: false);
                             },
@@ -8288,12 +8891,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                               ],
                             ),
                             onPressed: () async {
-                              const url = 'https://www.torn.com/factions.php?step=your#/tab=armoury';
+                              const url =
+                                  'https://www.torn.com/factions.php?step=your#/tab=armoury';
                               Navigator.of(context).pop();
                               _launchBrowser(url: url, shortTap: true);
                             },
                             onLongPress: () async {
-                              const url = "https://www.torn.com/factions.php?step=your#/tab=armoury";
+                              const url =
+                                  "https://www.torn.com/factions.php?step=your#/tab=armoury";
                               Navigator.of(context).pop();
                               _launchBrowser(url: url, shortTap: false);
                             },
@@ -8315,12 +8920,14 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                               ],
                             ),
                             onPressed: () async {
-                              const url = 'https://www.torn.com/companies.php#/option=funds';
+                              const url =
+                                  'https://www.torn.com/companies.php#/option=funds';
                               Navigator.of(context).pop();
                               _launchBrowser(url: url, shortTap: true);
                             },
                             onLongPress: () async {
-                              const url = "https://www.torn.com/companies.php#/option=funds";
+                              const url =
+                                  "https://www.torn.com/companies.php#/option=funds";
                               Navigator.of(context).pop();
                               _launchBrowser(url: url, shortTap: false);
                             },
@@ -8411,7 +9018,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                               ],
                             ),
                             onPressed: () async {
-                              const url = "https://www.torn.com/item.php#medical-items";
+                              const url =
+                                  "https://www.torn.com/item.php#medical-items";
                               if (longPress) {
                                 Navigator.of(context).pop();
                                 _launchBrowser(url: url, shortTap: false);
@@ -8495,7 +9103,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     final companyJobPoints = jobData?.companies;
     final personalJobPoints = jobData?.jobs;
 
-    if (userJob == null || personalJobPoints == null || companyJobPoints == null) {
+    if (userJob == null ||
+        personalJobPoints == null ||
+        companyJobPoints == null) {
       return const SizedBox.shrink();
     }
 
@@ -8532,14 +9142,17 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     } else {
       final companyKey = int.tryParse(userJob.companyType.toString());
       if (companyKey != null) {
-        final currentCompany = companyJobPoints.firstWhereOrNull((company) => company.company.id == companyKey);
+        final currentCompany = companyJobPoints
+            .firstWhereOrNull((company) => company.company.id == companyKey);
         if (currentCompany != null) {
           currentPoints = currentCompany.points;
         }
       }
     }
 
-    final headerString = unemployed ? 'Unemployed' : '$currentPoints job point${currentPoints == 1 ? '' : 's'}';
+    final headerString = unemployed
+        ? 'Unemployed'
+        : '$currentPoints job point${currentPoints == 1 ? '' : 's'}';
 
     _sharedJobPoints = headerString;
 
@@ -8549,14 +9162,18 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           label: "Open job points dialog",
           child: GestureDetector(
             onLongPress: () {
-              _launchBrowser(url: 'https://www.torn.com/companies.php', shortTap: false);
+              _launchBrowser(
+                  url: 'https://www.torn.com/companies.php', shortTap: false);
             },
-            onTap: () => _launchBrowser(url: 'https://www.torn.com/companies.php', shortTap: true),
+            onTap: () => _launchBrowser(
+                url: 'https://www.torn.com/companies.php', shortTap: true),
             child: Icon(Icons.work, color: Colors.brown[300], size: 23),
           ),
         ),
         const SizedBox(width: 6),
-        Semantics(label: headerString, child: SelectionArea(child: Text(headerString))),
+        Semantics(
+            label: headerString,
+            child: SelectionArea(child: Text(headerString))),
         const SizedBox(width: 10),
         GestureDetector(
           onTap: () => showDialog(
@@ -8582,8 +9199,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       if (_companyAddiction == null) return const SizedBox.shrink();
 
       Color? c = _themeProvider!.mainText;
-      if (_companyAddiction! < -1) c = _themeProvider!.getTextColor(Colors.orange[700]);
-      if (_companyAddiction! < -12) c = _themeProvider!.getTextColor(Colors.red[700]);
+      if (_companyAddiction! < -1)
+        c = _themeProvider!.getTextColor(Colors.orange[700]);
+      if (_companyAddiction! < -12)
+        c = _themeProvider!.getTextColor(Colors.red[700]);
 
       return Padding(
         padding: const EdgeInsets.only(left: 2),
@@ -8655,25 +9274,32 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       case "Torn":
         if (_user!.status!.description!.contains("to Torn from Argentina")) {
           return 'images/flags/ball/ball_argentina.png';
-        } else if (_user!.status!.description!.contains("to Torn from Canada")) {
+        } else if (_user!.status!.description!
+            .contains("to Torn from Canada")) {
           return 'images/flags/ball/ball_canada.png';
-        } else if (_user!.status!.description!.contains("to Torn from Cayman Islands")) {
+        } else if (_user!.status!.description!
+            .contains("to Torn from Cayman Islands")) {
           return 'images/flags/ball/ball_cayman.png';
         } else if (_user!.status!.description!.contains("to Torn from China")) {
           return 'images/flags/ball/ball_china.png';
-        } else if (_user!.status!.description!.contains("to Torn from Hawaii")) {
+        } else if (_user!.status!.description!
+            .contains("to Torn from Hawaii")) {
           return 'images/flags/ball/ball_hawaii.png';
         } else if (_user!.status!.description!.contains("to Torn from Japan")) {
           return 'images/flags/ball/ball_japan.png';
-        } else if (_user!.status!.description!.contains("to Torn from Mexico")) {
+        } else if (_user!.status!.description!
+            .contains("to Torn from Mexico")) {
           return 'images/flags/ball/ball_mexico.png';
-        } else if (_user!.status!.description!.contains("to Torn from South Africa")) {
+        } else if (_user!.status!.description!
+            .contains("to Torn from South Africa")) {
           return 'images/flags/ball/ball_south-africa.png';
-        } else if (_user!.status!.description!.contains("to Torn from Switzerland")) {
+        } else if (_user!.status!.description!
+            .contains("to Torn from Switzerland")) {
           return 'images/flags/ball/ball_switzerland.png';
         } else if (_user!.status!.description!.contains("to Torn from UAE")) {
           return 'images/flags/ball/ball_uae.png';
-        } else if (_user!.status!.description!.contains("to Torn from United Kingdom")) {
+        } else if (_user!.status!.description!
+            .contains("to Torn from United Kingdom")) {
           return 'images/flags/ball/ball_uk.png';
         } else {
           return '';
@@ -8708,7 +9334,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     final sectionSort = <Widget>[];
 
     for (final section in _userSectionOrder!) {
-      if (section == "Shortcuts" && _settingsProvider!.shortcutsEnabledProfile) {
+      if (section == "Shortcuts" &&
+          _settingsProvider!.shortcutsEnabledProfile) {
         sectionSort.add(
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
@@ -8781,11 +9408,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   }
 
   // Check whether we actually need to call the API (we call every 10 minutes for properties to easy API usage)
-  Future<void> _checkProperties(OwnProfileMisc miscApiResponse, bool forcedUpdate) async {
+  Future<void> _checkProperties(
+      OwnProfileMisc miscApiResponse, bool forcedUpdate) async {
     final now = DateTime.now();
 
-    final propertyInfoIsObsolete =
-        _rentedPropertiesLastChecked == null || now.difference(_rentedPropertiesLastChecked!).inMinutes >= 10;
+    final propertyInfoIsObsolete = _rentedPropertiesLastChecked == null ||
+        now.difference(_rentedPropertiesLastChecked!).inMinutes >= 10;
 
     if (forcedUpdate || propertyInfoIsObsolete) {
       _rentedPropertiesLastChecked = now;
@@ -8815,7 +9443,9 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       // This shows all properties rented by the user
       // (the user is the one renting AND also if he is the owner)
       rentedProperties = propertyModel.where((p) {
-        if (p.status != null && p.status!.contains("rented") && p.rentedBy != null) {
+        if (p.status != null &&
+            p.status!.contains("rented") &&
+            p.rentedBy != null) {
           return true;
         }
         return false;
@@ -8836,9 +9466,12 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     for (final property in rentedProperties) {
       futures.add(() async {
         try {
-          if (property.rentalPeriodRemaining != null && property.id != null && property.property?.name != null) {
+          if (property.rentalPeriodRemaining != null &&
+              property.id != null &&
+              property.property?.name != null) {
             final timeLeft = property.rentalPeriodRemaining!;
-            final daysString = timeLeft > 1 ? "$timeLeft days" : "less than a day";
+            final daysString =
+                timeLeft > 1 ? "$timeLeft days" : "less than a day";
             if (timeLeft > 0) {
               if (property.rentedBy!.id == _user!.playerId) {
                 thisRented[property.id.toString()] = {
@@ -8892,8 +9525,10 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                         style: TextStyle(
                           color: numberDays <= 5
                               ? numberDays <= 2
-                                  ? _themeProvider!.getTextColor(Colors.red[500])
-                                  : _themeProvider!.getTextColor(Colors.orange[800])
+                                  ? _themeProvider!
+                                      .getTextColor(Colors.red[500])
+                                  : _themeProvider!
+                                      .getTextColor(Colors.orange[800])
                               : tP.mainText,
                         ),
                       );
@@ -8907,13 +9542,15 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             borderRadius: BorderRadius.circular(100),
             onLongPress: () {
               _launchBrowser(
-                url: 'https://www.torn.com/properties.php#/p=options&ID=$key&tab=customize',
+                url:
+                    'https://www.torn.com/properties.php#/p=options&ID=$key&tab=customize',
                 shortTap: false,
               );
             },
             onTap: () {
               _launchBrowser(
-                url: 'https://www.torn.com/properties.php#/p=options&ID=$key&tab=customize',
+                url:
+                    'https://www.torn.com/properties.php#/p=options&ID=$key&tab=customize',
                 shortTap: true,
               );
             },
@@ -8939,7 +9576,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     if (mounted) {
       setState(() {
         _rentedProperties = currentItem;
-        _rentedPropertiesWidget = Semantics(explicitChildNodes: true, child: Column(children: propertyLines));
+        _rentedPropertiesWidget = Semantics(
+            explicitChildNodes: true, child: Column(children: propertyLines));
       });
     }
   }
@@ -8955,7 +9593,8 @@ class ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   }
 
   DateTime? _parseRaceTime(String input) {
-    final int? totalSeconds = RacingLiveActivityParser.parseRelativeSeconds(input);
+    final int? totalSeconds =
+        RacingLiveActivityParser.parseRelativeSeconds(input);
     if (totalSeconds == null) return null;
     return DateTime.now().add(Duration(seconds: totalSeconds));
   }
